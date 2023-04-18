@@ -1,0 +1,70 @@
+{
+    "name": {
+        "Description": "The participant's name"
+    },
+    "age": {
+        "Description": "age of the participant",
+        "Units": "years"
+    },
+    "species": {
+        "Description": "The name of the species of the participant"    
+    },
+    "sex": {
+        "Description": "sex of the participant as reported by the participant",
+        "Levels": {
+            "M": "male",
+            "F": "female"
+        }
+    },
+    "handedness": {
+        "Description": "handedness of the participant as reported by the participant",
+        "Levels": {
+            "L": "left",
+            "R": "right"
+        }
+    },
+    "nil": {
+        "Description": "Neurological Level of Injury",
+        "Levels": {
+            "C1": "No neuralogical function below the C1 vertebral level",
+            "C2": "No neuralogical function below the C2 vertebral level",
+            "C3": "No neuralogical function below the C3 vertebral level",
+            "C4": "No neuralogical function below the C4 vertebral level",
+            "C5": "No neuralogical function below the C5 vertebral level",
+            "C6": "No neuralogical function below the C6 vertebral level",
+            "C7": "No neuralogical function below the C7 vertebral level",
+            "T1": "No neuralogical function below the T1 vertebral level",
+            "T2": "No neuralogical function below the T2 vertebral level",
+            "T3": "No neuralogical function below the T3 vertebral level",
+            "T4": "No neuralogical function below the T4 vertebral level",
+            "T5": "No neuralogical function below the T5 vertebral level",
+            "T6": "No neuralogical function below the T6 vertebral level",
+            "T7": "No neuralogical function below the T7 vertebral level",
+            "T8": "No neuralogical function below the T8 vertebral level",
+            "T9": "No neuralogical function below the T9 vertebral level",
+            "T10": "No neuralogical function below the T10 vertebral level",
+            "T11": "No neuralogical function below the T11 vertebral level",
+            "T12": "No neuralogical function below the T12 vertebral level",
+            "L1": "No neuralogical function below the L1 vertebral level",
+            "L2": "No neuralogical function below the L2 vertebral level",
+            "L3": "No neuralogical function below the L3 vertebral level",
+            "L4": "No neuralogical function below the L4 vertebral level",
+            "L5": "No neuralogical function below the L5 vertebral level",
+            "S1": "No neuralogical function below the S1 vertebral level",
+            "S2": "No neuralogical function below the S2 vertebral level",
+            "S3": "No neuralogical function below the S3 vertebral level",
+            "S4": "No neuralogical function below the S4 vertebral level",
+            "S5": "No neuralogical function below the S5 vertebral level"
+        }
+    },
+    "inscsci": {
+        "Description": "International standard for classification of Spinal Cord Injury",
+        "Levels": {
+            "A": "Complete injury, no motor or sensory information",
+            "B": "Incomplete injury, no motor, some senosyr",
+            "C": "Incomplete injury, some sensory minor motor",
+            "D": "Motor icomplete, motor deficits",
+            "E": "No neurological deficits"
+        }
+    }
+}
