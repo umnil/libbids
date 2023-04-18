@@ -12,4 +12,6 @@ TEST(Dataset, ctor) {
   bool has_nil = false;
   for (auto i : dataset.participants_properties) has_nil |= i == "nil";
   EXPECT_EQ(has_nil, true);
+
+  EXPECT_EQ(dataset.participants_table.size(), 0);
 }
