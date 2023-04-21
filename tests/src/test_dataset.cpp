@@ -1,5 +1,6 @@
 #include "dataset.hpp"
 #include "gtest/gtest.h"
+#include "subject.hpp"
 
 TEST(Dataset, ctor) {
   std::filesystem::path cwd = std::filesystem::current_path();
@@ -14,4 +15,14 @@ TEST(Dataset, ctor) {
   EXPECT_EQ(has_nil, true);
 
   EXPECT_EQ(dataset.participants_table.size(), 0);
+}
+
+TEST(Dataset, get_subject) {
+  Dataset dataset(std::filesystem::current_path() / "tests" / "bids");
+  std::optional<Subject> subject = dataset.get_subject(2);
+  EXPECT_EQ(subject.has_value(), false);
+
+  EXPECT_EQ(dataset.is_subject(3), false);
+
+  dataset.confirm_add_subject_(0, "Kevin");
 }

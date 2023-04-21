@@ -29,11 +29,19 @@ set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_PATH}")
 # add_library
 # set_target_properties ## Where applicable
 
+# Qt6
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
+message(STATUS "Qt6 Found: ${Qt6_FOUND}")
+message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
+
 # Build the app
 add_executable("${PROJECT_NAME}"
 	# List your files to include in the project
+  src/dataset.cpp
   src/entity.cpp
 	src/main.cpp
+  src/subject.cpp
   src/utils.cpp
 	)
 
@@ -43,6 +51,7 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 	PUBLIC
 		include
     ${JSON_INCLUDE_DIR}
+    ${Qt6Widgets_INCLUDE_DIRS}
 )
 
 # Link personally-made dependencies
@@ -52,6 +61,7 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
 )
+target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
 # Add Tests
 add_subdirectory(tests)

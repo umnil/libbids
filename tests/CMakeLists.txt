@@ -26,6 +26,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 add_executable("${TEST_PROJECT_NAME}"
   ../src/dataset.cpp
   ../src/entity.cpp
+  ../src/subject.cpp
   ../src/utils.cpp
 
 	./src/main.cpp
@@ -40,10 +41,12 @@ target_include_directories("${TEST_PROJECT_NAME}" BEFORE
 		./include
 		"${gtest_SOURCE_DIR}/include"
     "${JSON_INCLUDE_DIR}"
+    "${Qt6Widgets_INCLUDE_DIRS}"
 )
 
 target_link_libraries("${TEST_PROJECT_NAME}"
 	PUBLIC
 		gtest_main
     json
+    Qt6::Widgets
 )

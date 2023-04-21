@@ -1,7 +1,9 @@
+#include <QMessageBox>
 #include <cassert>
 #include <fstream>
 
 #include "dataset.hpp"
+#include "subject.hpp"
 
 Dataset::Dataset(std::filesystem::path const& dir, bool silent)
     : bids_dir_(dir),
@@ -21,14 +23,18 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
 }
 
 bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
-  // if (!this->is_subject(subject_idx)) {
-  // } else {
-  // }
-  return false;
+  if (!this->is_subject(subject_idx)) {
+    int mb = QMessageBox::warning(
+        nullptr, "Warning",
+        "New Participant ID\nPlease confirm that this is a new participant",
+        QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+  } else {
+    return false;
+  }
 }
-// bool Dataset::is_subject_(int idx) {
-// return this->get_subject_(idx).has_value();
-//}
+bool Dataset::is_subject(int idx) {
+  return this->get_subject<Subject>(idx).has_value();
+}
 void Dataset::load_participants_table_(void) {
   if (!std::filesystem::exists(this->participants_filepath)) return;
 
