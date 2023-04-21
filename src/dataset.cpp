@@ -3,8 +3,9 @@
 
 #include "dataset.hpp"
 
-Dataset::Dataset(std::filesystem::path const& dir)
+Dataset::Dataset(std::filesystem::path const& dir, bool silent)
     : bids_dir_(dir),
+      silent_(silent),
       participants_filepath(dir / "participants.tsv"),
       participants_sidecar_filepath(dir / "participants.json") {
   std::ifstream participants_sidecar_fstream{
@@ -19,11 +20,15 @@ Dataset::Dataset(std::filesystem::path const& dir)
   this->load_participants_table_();
 }
 
-std::optional<Subject> Dataset::add_subject(
-    std::map<std::string, std::string> const& args) {
-  assert(args.size() <= this->participants_properties.size());
+bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
+  // if (!this->is_subject(subject_idx)) {
+  // } else {
+  // }
+  return false;
 }
-
+// bool Dataset::is_subject_(int idx) {
+// return this->get_subject_(idx).has_value();
+//}
 void Dataset::load_participants_table_(void) {
   if (!std::filesystem::exists(this->participants_filepath)) return;
 

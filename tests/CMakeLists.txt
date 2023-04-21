@@ -26,10 +26,12 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 add_executable("${TEST_PROJECT_NAME}"
   ../src/dataset.cpp
   ../src/entity.cpp
+  ../src/utils.cpp
 
 	./src/main.cpp
   ./src/test_dataset.cpp
 	./src/test_entity.cpp
+  ./src/test_utils.cpp
 )
 
 target_include_directories("${TEST_PROJECT_NAME}" BEFORE

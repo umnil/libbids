@@ -34,6 +34,7 @@ add_executable("${PROJECT_NAME}"
 	# List your files to include in the project
   src/entity.cpp
 	src/main.cpp
+  src/utils.cpp
 	)
 
 # Include directories for your dependencies so that the #include directive
