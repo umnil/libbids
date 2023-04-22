@@ -1,5 +1,6 @@
 #ifndef INCLUDE_DATASET_HPP_
 #define INCLUDE_DATASET_HPP_
+#include <QApplication>
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -29,6 +30,7 @@ class Dataset {
   bool confirm_add_subject_(int subject_idx, std::string subject_name);
 
  private:
+  std::optional<QApplication> app_;
   void load_participants_table_(void);
   std::filesystem::path bids_dir_;
   bool silent_;

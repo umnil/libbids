@@ -20,6 +20,8 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
                                        member_names.begin(),
                                        member_names.end());
   this->load_participants_table_();
+  char** argv = {{'\0'}};
+  this->app_.emplace(1, argv);
 }
 
 bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
