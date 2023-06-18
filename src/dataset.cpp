@@ -20,8 +20,13 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
                                        member_names.begin(),
                                        member_names.end());
   this->load_participants_table_();
-  char** argv = {{'\0'}};
-  this->app_.emplace(1, argv);
+  this->args_.push_back("App");
+  for (auto s : this->args_) {
+    this->argvs_.push_back(s.data());
+  }
+  this->argc_ = this->args_.size();
+  this->app_.emplace(
+      std::make_unique<QApplication>(this->argc_, this->argvs_.data()));
 }
 
 bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {

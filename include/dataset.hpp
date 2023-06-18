@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -30,7 +31,10 @@ class Dataset {
   bool confirm_add_subject_(int subject_idx, std::string subject_name);
 
  private:
-  std::optional<QApplication> app_;
+  std::vector<std::string> args_;
+  std::vector<char*> argvs_;
+  int argc_;
+  std::optional<std::unique_ptr<QApplication>> app_;
   void load_participants_table_(void);
   std::filesystem::path bids_dir_;
   bool silent_;
