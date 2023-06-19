@@ -1,3 +1,5 @@
+#include <QApplication>
+
 #include "dataset.hpp"
 #include "gtest/gtest.h"
 #include "subject.hpp"
@@ -23,6 +25,5 @@ TEST(Dataset, get_subject) {
   EXPECT_EQ(subject.has_value(), false);
 
   EXPECT_EQ(dataset.is_subject(3), false);
-
   dataset.confirm_add_subject_(0, "Kevin");
 }

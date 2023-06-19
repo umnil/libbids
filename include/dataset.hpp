@@ -2,6 +2,7 @@
 #define INCLUDE_DATASET_HPP_
 #include <QApplication>
 #include <algorithm>
+#include <any>
 #include <filesystem>
 #include <iostream>
 #include <map>
@@ -17,14 +18,14 @@ class Dataset {
  public:
   Dataset(std::filesystem::path const& dir, bool silent = false);
   template <typename T = Subject>
-  std::optional<T> add_subject(std::map<std::string, std::string> const& args);
+  std::optional<T> add_subject(std::map<std::string, std::any> const& args);
   template <typename T = Subject>
   std::optional<T> get_subject(int const& idx);
   bool is_subject(int idx);
 
   std::filesystem::path const participants_filepath;
   std::vector<std::string> participants_properties;
-  std::vector<std::map<std::string, std::string>> participants_table;
+  std::vector<std::map<std::string, std::any>> participants_table;
   Json::Value participants_sidecar;
   std::filesystem::path const participants_sidecar_filepath;
 
@@ -42,14 +43,15 @@ class Dataset {
 
 template <typename T>
 std::optional<T> Dataset::add_subject(
-    std::map<std::string, std::string> const& args) {
+    std::map<std::string, std::any> const& args) {
   assert(args.size() <= this->participants_properties.size());
 
-  std::string const& participant_id = args.at("participant_id");
+  std::string const& participant_id =
+      std::any_cast<std::string>(args.at("participant_id"));
   std::string const& id = (participant_id.starts_with("sub-"))
                               ? participant_id.substr(4)
                               : participant_id;
-  std::string const& name = args.at("name");
+  std::string const& name = std::any_cast<std::string>(args.at("name"));
   int idx;
   try {
     idx = std::stoi(id);
@@ -70,9 +72,11 @@ std::optional<T> Dataset::add_subject(
 template <typename T>
 std::optional<T> Dataset::get_subject(int const& idx) {
   std::string participant_id = ensure_participant_id(idx);
-  auto it = std::find_if(
-      this->participants_table.begin(), this->participants_table.end(),
-      [&](auto i) { return i["participant_id"] == participant_id; });
+  auto it = std::find_if(this->participants_table.begin(),
+                         this->participants_table.end(), [&](auto i) {
+                           return std::any_cast<std::string>(
+                                      i["participant_id"]) == participant_id;
+                         });
 
   if (it == this->participants_table.end()) return std::nullopt;
   return std::optional<T>(std::in_place, *this, *it);

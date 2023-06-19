@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <any>
 #include <cassert>
 #include <fstream>
 
@@ -10,6 +11,7 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
       silent_(silent),
       participants_filepath(dir / "participants.tsv"),
       participants_sidecar_filepath(dir / "participants.json") {
+  assert(std::filesystem::exists(this->bids_dir_));
   std::ifstream participants_sidecar_fstream{
       this->participants_sidecar_filepath.c_str()};
   participants_sidecar_fstream >> this->participants_sidecar;
@@ -64,13 +66,13 @@ void Dataset::load_participants_table_(void) {
     participants_fs.getline(line.data(), line.size());
 
     std::istringstream line_stream(line);
-    std::map<std::string, std::string> row;
+    std::map<std::string, std::any> row;
     int i = 0;
     while (!line_stream.eof()) {
       std::string value(255, '\0');
       line_stream.getline(value.data(), value.size(), '\t');
       std::string& key = header[i];
-      row.emplace(std::pair(key, value));
+      row.emplace(std::pair(key, std::make_any<std::string>(value)));
       i++;
     }
     this->participants_table.push_back(row);
