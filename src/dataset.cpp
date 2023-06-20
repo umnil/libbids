@@ -70,6 +70,9 @@ std::vector<int> Dataset::get_existing_subjects(void) {
 bool Dataset::is_subject(int idx) {
   return this->get_subject<Subject>(idx).has_value();
 }
+
+bool Dataset::is_silent(void) const { return this->silent_; }
+
 void Dataset::load_participants_table_(void) {
   if (!std::filesystem::exists(this->participants_filepath)) return;
 
