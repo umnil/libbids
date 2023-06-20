@@ -1,9 +1,107 @@
+#include <QMessageBox>
+
+#include "dataset.hpp"
+#include "session.hpp"
 #include "subject.hpp"
 
 Subject::Subject(Dataset const& dataset,
                  std::map<std::string, std::string> const& args)
-    : dataset_(dataset), properties_(args) {}
+    : Entity("Subject", std::nullopt_t), dataset_(dataset), properties_(args) {
+  this->properties["participant_id"] =
+      this->ensure_participant_id_(this->properties["participant_id"]);
+  this->participant_id_ = this->properties["participant_id"];
+  this->participant_name_ = this->properties["name"];
+  std::filesystem::create_directories(this->path());
+  this->set_label_(this->participant_id_.substr(4));
+}
+
+std::string const& Subject::get_participant_id() const {
+  return this->participant_id_;
+}
+
+std::string const& Subject::get_participant_name() const {
+  return this->participant_name_;
+}
+
+std::filesystem::path Subject::path() const {
+  return this->dataset_->participants_filepath / this->participant_id_;
+}
+
+Session Subject::add_session() {
+  int n = this->get_n_sessions();
+  if (this->dataset_->is_silent() && this->confirm_add_session()) {
+    return Session(*this, n + 1);
+  } else {
+    return get_session(n);
+  }
+}
+
+Session Subject::get_session(int session_id) {
+  assert(session_id <= get_n_sessions());
+  return Session(*this, session_id);
+}
+
+int Subject::get_n_sessions() const {
+  if (!std::filesystem::exists(this->path())) return 0;
+  int count = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(this->path())) {
+    if (entry.is_directory() &&
+        entry.path().filename().string().find("ses-") == 0) {
+      count++;
+    }
+  }
+  return count;
+}
 
 std::map<std::string, std::string> const& Subject::to_dict(void) const {
   return this->properties_;
+}
+
+bool Subject::confirm_add_session() {
+  int n_sessions = get_n_sessions();
+  if (n_sessions > 0) {
+    QMessageBox msgbox;
+    msgbox.setText(QString("OK to start new session: #") +
+                   QString::number(n_sessions + 1) + QString("?"));
+    QPushButton* ybtn =
+        msgbox.addButton(QPushButton("OK"), QMessageBox::YesRole);
+    QPushButton* nbtn =
+        msgbox.addButton(QPushButton(QString("No, use previous session #") +
+                                     QString::number(n_sessions)),
+                         QMessageBox::NoRole);
+    msgbox.exec();
+    if (msgbox.clickedButton() == ybtn) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return true;
+  }
+}
+
+std::unordered_map<std::string, std::string> Subject::get_participant_sidecar()
+    const {
+  std::map<std::string, std::string> sidecar;
+  std::ifstream file(get_participant_sidecar_filepath());
+  if (file.is_open()) {
+    json sidecar_json;
+    file >> sidecar_json;
+    sidecar = sidecar_json.get<std::map<std::string, std::string>>();
+  }
+  return sidecar;
+}
+
+std::string Subject::ensure_participant_id_(std::string const& id) {
+  std::string retval;
+  if (std::isdigit(id[0])) {
+    int int_id = std::stoi(id);
+    retval = "sub-" + std::to_string(int_id);
+  } else {
+    retval = id;
+    if (retval.substr(0, 4) != "sub-") {
+      retval = "sub-" + retval;
+    }
+  }
+  return retval;
 }
