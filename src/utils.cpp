@@ -14,7 +14,7 @@ std::string ensure_participant_id(int const& id) {
          std::string(2 - (retval.size() > 2 ? 2 : retval.size()), '0') + retval;
 }
 
-std::string trim(const std::string& str) {
+std::string trim(std::string const& str) {
   std::string trimmed(str.data());
 
   // Remove whitespace from the beginning
