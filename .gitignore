@@ -31,7 +31,12 @@
 *.out
 *.app
 
+# python
+*.egg*/
+*__pycache__*
+
 # Build directory
 build/
+dist/
 tests/gtest/
 *.zip

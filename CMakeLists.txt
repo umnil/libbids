@@ -40,6 +40,7 @@ add_executable("${PROJECT_NAME}"
 	# List your files to include in the project
   src/dataset.cpp
   src/entity.cpp
+  src/event.cpp
 	src/main.cpp
   src/subject.cpp
   src/utils.cpp

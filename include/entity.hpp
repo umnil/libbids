@@ -15,12 +15,14 @@ class Entity {
 
  private:
   void set_key_(std::optional<std::string> const& key);
+  void set_label_(int value);
+  void set_label_(std::string const& value);
 
-  std::string id_;
-  int index_;
-  std::string key_;
-  std::string label_;
-  std::string name_;
-  int padding_;
+  std::string id_;     // ex. sub-001
+  int index_;          // ex. 1
+  std::string key_;    // ex. sub
+  std::string label_;  // ex. 001
+  std::string name_;   // ex. Subject
+  int padding_;        // ex. 3
 };
 #endif /* INCLUDE_ENTITY_HPP_ */
