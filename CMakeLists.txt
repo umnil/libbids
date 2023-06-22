@@ -42,6 +42,7 @@ add_executable("${PROJECT_NAME}"
   src/entity.cpp
   src/event.cpp
 	src/main.cpp
+  src/session.cpp
   src/subject.cpp
   src/utils.cpp
 	)

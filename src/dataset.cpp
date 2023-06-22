@@ -42,6 +42,7 @@ bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
         nullptr, "Warning",
         "New Participant ID\nPlease confirm that this is a new participant",
         QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+    return mb == QMessageBox::StandardButton::Ok;
   } else {
     return false;
   }

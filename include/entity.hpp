@@ -11,13 +11,14 @@ class Entity {
   Entity(std::string name, std::optional<std::string> key, std::string value,
          int padding = 2);
 
-  std::string const& id(void);
+  std::string const& id(void) const;
 
- private:
+ protected:
   void set_key_(std::optional<std::string> const& key);
   void set_label_(int value);
   void set_label_(std::string const& value);
 
+ private:
   std::string id_;     // ex. sub-001
   int index_;          // ex. 1
   std::string key_;    // ex. sub
