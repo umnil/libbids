@@ -31,8 +31,9 @@
 *.out
 *.app
 
-# eggs
+# python
 *.egg*/
+*__pycache__*
 
 # Build directory
 build/
