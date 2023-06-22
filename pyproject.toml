@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel", "pybind11"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libbids"
+version = "0.0.1"
+description = "Library for generating data using the Brain Imaging Data Structure"
+authors = [ { name = "Kevin Davis", email = "kevin.davis@miami.edu" } ]
+dependencies = [
+  "pandas",
+  "pybids",
+  "PyQt6"
+]
+
+[tools.setuptools.packages.find]
+exclude = ["tests"]
