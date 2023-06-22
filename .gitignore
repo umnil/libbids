@@ -31,7 +31,11 @@
 *.out
 *.app
 
+# eggs
+*.egg*/
+
 # Build directory
 build/
+dist/
 tests/gtest/
 *.zip
