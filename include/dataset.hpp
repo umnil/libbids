@@ -25,6 +25,7 @@ class Dataset {
   bool is_subject(int idx);
   bool is_silent(void) const;
 
+  std::filesystem::path const bids_dir(void) const;
   std::filesystem::path const participants_filepath;
   std::vector<std::string> participants_properties;
   std::vector<std::map<std::string, std::string>> participants_table;
