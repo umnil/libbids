@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 include(ExternalProject)
 set(PROJECT_NAME bids)
-project("${PROJECT_NAME}" VERSION 0.1 LANGUAGES CXX)
+project("${PROJECT_NAME}" VERSION 0.0.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
