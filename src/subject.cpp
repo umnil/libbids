@@ -1,4 +1,10 @@
+#include <json/json.h>
+
 #include <QMessageBox>
+#include <QPushButton>
+#include <fstream>
+#include <map>
+#include <optional>
 
 #include "dataset.hpp"
 #include "session.hpp"
@@ -6,11 +12,11 @@
 
 Subject::Subject(Dataset const& dataset,
                  std::map<std::string, std::string> const& args)
-    : Entity("Subject", std::nullopt_t), dataset_(dataset), properties_(args) {
-  this->properties["participant_id"] =
-      this->ensure_participant_id_(this->properties["participant_id"]);
-  this->participant_id_ = this->properties["participant_id"];
-  this->participant_name_ = this->properties["name"];
+    : Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
+  this->properties_["participant_id"] =
+      this->ensure_participant_id_(this->properties_["participant_id"]);
+  this->participant_id_ = this->properties_["participant_id"];
+  this->participant_name_ = this->properties_["name"];
   std::filesystem::create_directories(this->path());
   this->set_label_(this->participant_id_.substr(4));
 }
@@ -24,12 +30,12 @@ std::string const& Subject::get_participant_name() const {
 }
 
 std::filesystem::path Subject::path() const {
-  return this->dataset_->participants_filepath / this->participant_id_;
+  return this->dataset_.bids_dir() / this->participant_id_;
 }
 
 Session Subject::add_session() {
   int n = this->get_n_sessions();
-  if (this->dataset_->is_silent() && this->confirm_add_session()) {
+  if (this->dataset_.is_silent() && this->confirm_add_session()) {
     return Session(*this, n + 1);
   } else {
     return get_session(n);
@@ -63,12 +69,10 @@ bool Subject::confirm_add_session() {
     QMessageBox msgbox;
     msgbox.setText(QString("OK to start new session: #") +
                    QString::number(n_sessions + 1) + QString("?"));
-    QPushButton* ybtn =
-        msgbox.addButton(QPushButton("OK"), QMessageBox::YesRole);
-    QPushButton* nbtn =
-        msgbox.addButton(QPushButton(QString("No, use previous session #") +
-                                     QString::number(n_sessions)),
-                         QMessageBox::NoRole);
+    QPushButton* ybtn = msgbox.addButton(QString("Ok"), QMessageBox::YesRole);
+    QPushButton* nbtn = msgbox.addButton(
+        QString("No, use previous session #") + QString::number(n_sessions),
+        QMessageBox::NoRole);
     msgbox.exec();
     if (msgbox.clickedButton() == ybtn) {
       return true;
@@ -80,14 +84,16 @@ bool Subject::confirm_add_session() {
   }
 }
 
-std::unordered_map<std::string, std::string> Subject::get_participant_sidecar()
-    const {
+std::map<std::string, std::string> Subject::get_participant_sidecar() const {
   std::map<std::string, std::string> sidecar;
-  std::ifstream file(get_participant_sidecar_filepath());
+  std::ifstream file(this->dataset_.participants_sidecar_filepath);
   if (file.is_open()) {
-    json sidecar_json;
+    Json::Value sidecar_json;
     file >> sidecar_json;
-    sidecar = sidecar_json.get<std::map<std::string, std::string>>();
+    // Convert the JSON Value to a map of strings
+    for (auto const& key : sidecar_json.getMemberNames()) {
+      sidecar[key] = sidecar_json[key].asString();
+    }
   }
   return sidecar;
 }

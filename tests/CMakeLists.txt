@@ -27,6 +27,7 @@ add_executable("${TEST_PROJECT_NAME}"
   ../src/dataset.cpp
   ../src/entity.cpp
   ../src/event.cpp
+  ../src/session.cpp
   ../src/subject.cpp
   ../src/utils.cpp
 

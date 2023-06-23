@@ -18,7 +18,7 @@ Entity::Entity(std::string name, std::optional<std::string> key,
   this->set_label_(value);
 }
 
-std::string const& Entity::id(void) { return this->id_; }
+std::string const& Entity::id(void) const { return this->id_; }
 
 void Entity::set_key_(std::optional<std::string> const& key) {
   if (key.has_value())
@@ -43,7 +43,7 @@ void Entity::set_label_(int value) {
 
 void Entity::set_label_(std::string const& value) {
   try {
-    this->index_ = std::stoi(label);
+    this->index_ = std::stoi(value);
   } catch (std::invalid_argument const& ex) {
     this->index_ = -1;
   }

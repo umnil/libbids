@@ -22,18 +22,24 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
                                        member_names.begin(),
                                        member_names.end());
   this->load_participants_table_();
-  this->args_.push_back("App");
-  for (auto s : this->args_) {
-    this->argvs_.push_back(s.data());
+  if (!this->silent_) {
+    this->args_.push_back("App");
+    for (auto& s : this->args_) {
+      this->argvs_.push_back(s.data());
+    }
+    this->argc_ = this->args_.size();
+    this->app_.emplace(
+        std::make_unique<QApplication>(this->argc_, this->argvs_.data()));
   }
-  this->argc_ = this->args_.size();
-  this->app_.emplace(
-      std::make_unique<QApplication>(this->argc_, this->argvs_.data()));
 }
 
 void Dataset::append_participant(Subject const& subject) {
   this->participants_table.push_back(subject.to_dict());
   this->save_participants_table_();
+}
+
+std::filesystem::path const Dataset::bids_dir(void) const {
+  return this->bids_dir_;
 }
 
 bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
@@ -42,6 +48,7 @@ bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
         nullptr, "Warning",
         "New Participant ID\nPlease confirm that this is a new participant",
         QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+    return mb == QMessageBox::StandardButton::Ok;
   } else {
     return false;
   }
