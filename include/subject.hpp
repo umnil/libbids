@@ -10,7 +10,7 @@
 class Dataset;
 class Session;
 
-class Subject : Entity {
+class Subject : public Entity {
  public:
   Subject(Dataset const& dataset,
           std::map<std::string, std::string> const& args);
@@ -40,7 +40,7 @@ class Subject : Entity {
 
 template <typename T>
 T const& Subject::operator[](std::string const& idx) const {
-  return this->properties_[idx];
+  return this->properties_.at(idx);
 }
 
 template <typename T>

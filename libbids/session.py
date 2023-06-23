@@ -19,7 +19,6 @@ class Session(Entity):
         """
         super(Session, self).__init__("Session", value=idx)
         self.subject: "Subject" = subject
-        self.idx: int = idx
         self.path.mkdir(exist_ok=True)
 
     @property

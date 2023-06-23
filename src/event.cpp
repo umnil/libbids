@@ -70,7 +70,7 @@ std::vector<Event> Event::generate_variable_duration_events(
   std::vector<std::chrono::milliseconds> event_onsets;
   event_onsets.reserve(max_n_events);
   std::vector<double> event_onsets_array = {0.0};
-  std::partial_sum(event_durations.cbegin(), event_durations.cend() - 1,
+  std::partial_sum(event_durations.cbegin(), event_durations.cend(),
                    std::back_inserter(event_onsets));
 
   int n_types = static_cast<int>(trial_types.size());
@@ -80,9 +80,11 @@ std::vector<Event> Event::generate_variable_duration_events(
   event_types.reserve(max_n_events);
 
   if (n_types > 2) {
+    // Create a temporary list of events
     std::vector<std::vector<std::string>> list_events;
     list_events.reserve(n_repeats);
 
+    // type_set = a set of trial types
     std::vector<std::string> type_set(trial_types.begin(), trial_types.end());
     std::shuffle(type_set.begin(), type_set.end(), std::random_device());
     list_events.push_back(type_set);
@@ -102,7 +104,16 @@ std::vector<Event> Event::generate_variable_duration_events(
     }
 
     for (auto const& event_set : list_events) {
-      event_types.insert(event_types.end(), event_set.begin(), event_set.end());
+      int n_events_remaining = max_n_events - event_types.size();
+      if (n_events_remaining < event_set.size()) {
+        int n_trunc = event_set.size() - n_events_remaining;
+        event_types.insert(event_types.end(), event_set.begin(),
+                           event_set.end() - n_trunc);
+        break;
+      } else {
+        event_types.insert(event_types.end(), event_set.begin(),
+                           event_set.end());
+      }
     }
   } else {
     event_types.reserve(n_repeats * n_types);

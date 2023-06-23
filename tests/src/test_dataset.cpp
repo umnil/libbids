@@ -54,6 +54,8 @@ class DatasetTest : public ::testing::Test {
   }
 };
 
+using DatasetDeathTest = DatasetTest;
+
 TEST_F(DatasetTest, AddSubject_ValidArguments_ReturnsSubject) {
   std::map<std::string, std::string> args = {{"participant_id", "sub-03"},
                                              {"name", "Bob"}};
@@ -65,7 +67,8 @@ TEST_F(DatasetTest, AddSubject_ValidArguments_ReturnsSubject) {
   EXPECT_EQ((*subject)["name"], "Bob");
 }
 
-TEST_F(DatasetTest, AddSubject_TooManyArguments_ReturnsNullopt) {
+TEST_F(DatasetDeathTest, AddSubject_TooManyArguments_ReturnsNullopt) {
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   std::map<std::string, std::string> args = {
       {"participant_id", "sub-03"},
       {"name", "Bob"},
