@@ -1,5 +1,8 @@
+#include <json/json.h>
+
 #include <QMessageBox>
 #include <QPushButton>
+#include <fstream>
 #include <map>
 #include <optional>
 
@@ -27,7 +30,7 @@ std::string const& Subject::get_participant_name() const {
 }
 
 std::filesystem::path Subject::path() const {
-  return this->dataset_.participants_filepath / this->participant_id_;
+  return this->dataset_.bids_dir() / this->participant_id_;
 }
 
 Session Subject::add_session() {
@@ -83,11 +86,14 @@ bool Subject::confirm_add_session() {
 
 std::map<std::string, std::string> Subject::get_participant_sidecar() const {
   std::map<std::string, std::string> sidecar;
-  std::ifstream file(this->dataset.participant_sidecar_filepath());
+  std::ifstream file(this->dataset_.participants_sidecar_filepath);
   if (file.is_open()) {
-    json sidecar_json;
+    Json::Value sidecar_json;
     file >> sidecar_json;
-    sidecar = sidecar_json.get<std::map<std::string, std::string>>();
+    // Convert the JSON Value to a map of strings
+    for (auto const& key : sidecar_json.getMemberNames()) {
+      sidecar[key] = sidecar_json[key].asString();
+    }
   }
   return sidecar;
 }
