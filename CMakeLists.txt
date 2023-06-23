@@ -3,14 +3,23 @@
 
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 include(ExternalProject)
-set(PROJECT_NAME bids)
+include(FetchContent)
+set(PROJECT_NAME clibbids)
 project("${PROJECT_NAME}" VERSION 0.0.2 LANGUAGES CXX)
 
+SET(PY ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # Insert Dependencies here
+FetchContent_Declare(
+  pybind11
+  GIT_REPOSITORY https://github.com/pybind/pybind11
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(pybind11)
+add_subdirectory("${pybind11_SOURCE_DIR}")
 set(JSON_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/json")
 ExternalProject_Add(jsoncpp
   PREFIX json
@@ -36,6 +45,7 @@ message(STATUS "Qt6 Found: ${Qt6_FOUND}")
 message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
 
 # Build the app
+if(NOT PY)
 add_executable("${PROJECT_NAME}"
 	# List your files to include in the project
   src/dataset.cpp
@@ -45,7 +55,16 @@ add_executable("${PROJECT_NAME}"
   src/session.cpp
   src/subject.cpp
   src/utils.cpp
-	)
+)
+endif()
+
+# Build the python module
+pybind11_add_module("${PROJECT_NAME}"
+  src/entity.cpp
+  src/ext.cpp
+  src/session.cpp
+  src/subject.cpp
+)
 
 # Include directories for your dependencies so that the #include directive
 # works
