@@ -4,7 +4,6 @@
 #include <fstream>
 #include <map>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "dataset.hpp"
@@ -60,9 +59,9 @@ TEST_F(DatasetTest, AddSubject_ValidArguments_ReturnsSubject) {
   std::map<std::string, std::string> args = {{"participant_id", "sub-03"},
                                              {"name", "Bob"}};
 
-  std::optional<Subject> subject = dataset->add_subject(args);
+  std::unique_ptr<Subject> subject = dataset->add_subject(args);
 
-  EXPECT_TRUE(subject.has_value());
+  EXPECT_TRUE(subject != nullptr);
   EXPECT_EQ((*subject)["participant_id"], "sub-03");
   EXPECT_EQ((*subject)["name"], "Bob");
 }
@@ -75,22 +74,23 @@ TEST_F(DatasetDeathTest, AddSubject_TooManyArguments_ReturnsNullopt) {
       {"age", "25"}  // Extra argument
   };
 
-  EXPECT_DEATH({ std::optional<Subject> subject = dataset->add_subject(args); },
-               "Assertion failed");
+  EXPECT_DEATH(
+      { std::unique_ptr<Subject> subject = dataset->add_subject(args); },
+      "Assertion failed");
 }
 
 TEST_F(DatasetTest, GetSubject_ExistingSubject_ReturnsSubject) {
-  std::optional<Subject> subject = dataset->get_subject<Subject>(1);
+  std::unique_ptr<Subject> subject = dataset->get_subject<Subject>(1);
 
-  EXPECT_TRUE(subject.has_value());
+  EXPECT_TRUE(subject != nullptr);
   EXPECT_EQ((*subject)["participant_id"], "sub-01");
   EXPECT_EQ((*subject)["name"], "John");
 }
 
 TEST_F(DatasetTest, GetSubject_NonexistentSubject_ReturnsNullopt) {
-  std::optional<Subject> subject = dataset->get_subject<Subject>(3);
+  std::unique_ptr<Subject> subject = dataset->get_subject<Subject>(3);
 
-  EXPECT_FALSE(subject.has_value());
+  EXPECT_FALSE(subject != nullptr);
 }
 
 TEST_F(DatasetTest, IsSubject_ExistingSubject_ReturnsTrue) {
