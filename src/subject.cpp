@@ -10,7 +10,7 @@
 #include "session.hpp"
 #include "subject.hpp"
 
-Subject::Subject(Dataset const& dataset,
+Subject::Subject(Dataset& dataset,
                  std::map<std::string, std::string> const& args)
     : Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
   this->properties_["participant_id"] =
@@ -86,7 +86,7 @@ bool Subject::confirm_add_session() {
 
 std::map<std::string, std::string> Subject::get_participant_sidecar() const {
   std::map<std::string, std::string> sidecar;
-  std::ifstream file(this->dataset_.participants_sidecar_filepath);
+  std::ifstream file(this->dataset_.participants_sidecar_filepath());
   if (file.is_open()) {
     Json::Value sidecar_json;
     file >> sidecar_json;
@@ -96,6 +96,14 @@ std::map<std::string, std::string> Subject::get_participant_sidecar() const {
     }
   }
   return sidecar;
+}
+
+Subject& Subject::operator=(Subject&& other) {
+  this->dataset_ = std::move(other.dataset_);
+  this->participant_id_ = other.participant_id_;
+  this->participant_name_ = other.participant_name_;
+  this->properties_ = other.properties_;
+  return *this;
 }
 
 std::string Subject::ensure_participant_id_(std::string const& id) {

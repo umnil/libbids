@@ -12,8 +12,7 @@ class Session;
 
 class Subject : public Entity {
  public:
-  Subject(Dataset const& dataset,
-          std::map<std::string, std::string> const& args);
+  Subject(Dataset& dataset, std::map<std::string, std::string> const& args);
   std::string const& get_participant_id() const;
   std::string const& get_participant_name() const;
   std::filesystem::path path() const;
@@ -24,6 +23,8 @@ class Subject : public Entity {
   bool confirm_add_session();
   std::map<std::string, std::string> get_participant_sidecar() const;
 
+  Subject& operator=(Subject&& other);
+
   template <typename T = std::string>
   T const& operator[](std::string const& idx) const;
 
@@ -32,7 +33,7 @@ class Subject : public Entity {
 
  private:
   static std::string ensure_participant_id_(std::string const& id);
-  Dataset const& dataset_;
+  Dataset& dataset_;
   std::string participant_id_;
   std::string participant_name_;
   std::map<std::string, std::string> properties_;
