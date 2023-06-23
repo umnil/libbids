@@ -10,10 +10,16 @@ class Subject;
 
 class Session : public Entity {
  public:
+  /**
+   * Initialize a new session for a giben subject
+   * @brief Default Constructor
+   * @param subject The subject object that will own this session
+   * @param idx The session index number or identifier
+   */
   Session(Subject const& subject, int idx);
 
   std::filesystem::path path() const;
-  std::string get_prefix() const;
+  std::string prefix() const;
 
  private:
   Subject const& subject_;

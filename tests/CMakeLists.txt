@@ -36,6 +36,7 @@ add_executable("${TEST_PROJECT_NAME}"
 	./src/test_entity.cpp
   ./src/test_enums.cpp
   ./src/test_event.cpp
+  ./src/test_session.cpp
   ./src/test_subject.cpp
   ./src/test_utils.cpp
 )

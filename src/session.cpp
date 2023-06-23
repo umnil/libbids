@@ -10,6 +10,6 @@ std::filesystem::path Session::path() const {
   return this->subject_.path() / this->id();
 }
 
-std::string Session::get_prefix() const {
+std::string Session::prefix() const {
   return this->subject_.id() + "_" + this->id();
 }
