@@ -42,7 +42,7 @@ class CMakeExtension(BaseExtension):
 
     def prepare(self, builder):
         # Only used for dev purposes
-        if self.build_dir.exists() and (os.environ.get("DEV") is not None):
+        if self.build_dir.exists() and (os.environ.get("LIBBIDS_DEV") is not None):
             for root, dirs, files in os.walk(self.build_dir):
                 for f in (dirs + files):
                     os.chmod(Path(root) / f, 0o777)
