@@ -40,14 +40,17 @@ class CMakeExtension(BaseExtension):
             return None
         return self.ext_list()[0]
 
+    def cleanup(self, builder):
+        for root, dirs, files in os.walk(self.build_dir):
+            for f in (dirs + files):
+                os.chmod(Path(root) / f, 0o777)
+        
+        shutil.rmtree(self.build_dir)
+
     def prepare(self, builder):
         # Only used for dev purposes
         if self.build_dir.exists() and (os.environ.get("LIBBIDS_DEV") is not None):
-            for root, dirs, files in os.walk(self.build_dir):
-                for f in (dirs + files):
-                    os.chmod(Path(root) / f, 0o777)
-            
-            shutil.rmtree(self.build_dir)
+            self.cleanup()
         
         self.build_dir.mkdir(exist_ok=True)
         if self.exists():
@@ -70,6 +73,8 @@ class CMakeExtension(BaseExtension):
             )
         else:
             print(f"Error: specified file {self.ext_file_path} not found!", file=sys.stderr)
+        
+        self.cleanup()
 
 
 setup(
