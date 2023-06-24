@@ -73,6 +73,7 @@ class CMakeExtension(BaseExtension):
 
 
 setup(
+    name="clibbids"
     ext_modules=[
         CMakeExtension(
             "clibbids",
