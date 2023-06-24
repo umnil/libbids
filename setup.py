@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 import subprocess
@@ -10,61 +11,60 @@ from setuptools import setup, find_packages
 from setuptools import Extension as BaseExtension
 
 
-build_dir = Path("build")
-if build_dir.exists():
-    shutil.rmtree(build_dir)
-build_dir.mkdir(exist_ok=True)
-
-# configure
-subprocess.run(
-    ["cmake", ".."],
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    cwd="build",
-)
-subprocess.run(
-    ["cmake", "--build", "."],
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    cwd="build",
-)
-
-
-class CustomExtBuilder(build_ext):
+class CMakeExtBuilder(build_ext):
 
     def build_extension(self, ext):
-        if isinstance(ext, Precompiled):
-            return ext.copy_precompiled(self)
+        if isinstance(ext, CMakeExtension):
+            ext.prepare(self)
+            ext.configure(self)
+            ext.build(self)
+            return ext.install(self)
         return super().build_extension(ext)
 
 
-class Precompiled(BaseExtension):
+class CMakeExtension(BaseExtension):
 
-    def __init__(self, name, precompiled, *args, **kwargs):
+    def __init__(self, name, build_dir, *args, **kwargs):
         super().__init__(name, [], *args, **kwargs)
-        self.precompiled = Path(precompiled)
+        self.build_dir = Path(build_dir)
 
+    def prepare(self, builder):
+        if self.build_dir.exists():
+            for root, dirs, files in os.walk(self.build_dir):
+                for f in (dirs + files):
+                    os.chmod(Path(root) / f, 0o777)
+            
+            shutil.rmtree(self.build_dir)
         
-    def copy_precompiled(self, builder):
-        if self.precompiled.exists():
+        self.build_dir.mkdir()
+
+    def configure(self, builder):
+        subprocess.run( ["cmake", ".."], cwd=self.build_dir)
+
+    def build(self, builder):
+        subprocess.run( ["cmake", "--build", "."], cwd=self.build_dir)
+
+    def install(self, builder):
+        sfx = importlib.machinery.EXTENSION_SUFFIXES[0]
+        self.ext_file_path = next(self.build_dir.glob(f"**/*{sfx}"))
+        if self.ext_file_path.exists():
             path = Path(builder.get_ext_fullpath(self.name))
             path.parent.mkdir(parents=True)
+
             shutil.copyfile(
-                str(self.precompiled),
+                str(self.ext_file_path),
                 builder.get_ext_fullpath(self.name)
             )
         else:
-            print(f"Error: specified file {self.precompiled} not found!", file=sys.stderr)
+            print(f"Error: specified file {self.ext_file_path} not found!", file=sys.stderr)
 
 
 setup(
     ext_modules=[
-        Precompiled(
+        CMakeExtension(
             "clibbids",
-            precompiled=next(build_dir.glob("clibbids*.*"))
+            build_dir=Path("build")
         )
     ],
-    cmdclass={"build_ext": CustomExtBuilder},
+    cmdclass={"build_ext": CMakeExtBuilder},
 )
