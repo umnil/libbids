@@ -7,7 +7,6 @@
 #include "add.hpp"
 #include "entity.hpp"
 #include "session.hpp"
-#include "subject.hpp"
 
 namespace py = pybind11;
 
@@ -29,9 +28,7 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("id", &Entity::id);
 
   py::class_<Session>(m, "Session")
-      .def(py::init([](py::object sub, int i) {
-        return Session(*py::cast<Subject*>(sub), i);
-      }))
+      .def(py::init<py::object, int>())
       .def_property_readonly("path", &Session::path)
       .def_property_readonly("prefix", &Session::prefix);
 }
