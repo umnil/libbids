@@ -74,13 +74,11 @@ class CMakeExtension(Pybind11Extension):
             )
         else:
             print(f"Error: specified file {self.ext_file_path} not found!", file=sys.stderr)
-        
-        self.cleanup(builder)
-        print("CLEAN")
 
 
 setup(
-    name="clibbids",
+    name="libbids",
+    packages=find_packages(exclude=["tests", "src", "include", "toolchains"]),
     ext_modules=[
         CMakeExtension(
             "clibbids",
