@@ -1,22 +1,34 @@
 #ifndef INCLUDE_SESSION_HPP_
 #define INCLUDE_SESSION_HPP_
 
+#include <pybind11/pybind11.h>
+
 #include <filesystem>
 #include <string>
 
 #include "entity.hpp"
 
-class Subject;
+namespace py = pybind11;
+
+// class Subject;
 
 class Session : public Entity {
  public:
-  Session(Subject const& subject, int idx);
+  /**
+   * Initialize a new session for a giben subject
+   * @brief Default Constructor
+   * @param subject The subject object that will own this session
+   * @param idx The session index number or identifier
+   */
+  // Session(Subject const& subject, int idx);
+  Session(py::object subject, int idx);
 
   std::filesystem::path path() const;
-  std::string get_prefix() const;
+  std::string prefix() const;
 
  private:
-  Subject const& subject_;
+  // Subject const& subject_;
+  py::object subject_;
 };
 
 #endif /* INCLUDE_SESSION_HPP_ */

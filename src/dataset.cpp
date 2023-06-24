@@ -9,11 +9,11 @@
 Dataset::Dataset(std::filesystem::path const& dir, bool silent)
     : bids_dir_(dir),
       silent_(silent),
-      participants_filepath(dir / "participants.tsv"),
-      participants_sidecar_filepath(dir / "participants.json") {
+      participants_filepath_(dir / "participants.tsv"),
+      participants_sidecar_filepath_(dir / "participants.json") {
   assert(std::filesystem::exists(this->bids_dir_));
   std::ifstream participants_sidecar_fstream{
-      this->participants_sidecar_filepath.c_str()};
+      this->participants_sidecar_filepath_.c_str()};
   participants_sidecar_fstream >> this->participants_sidecar;
 
   auto member_names = this->participants_sidecar.getMemberNames();
@@ -28,8 +28,8 @@ Dataset::Dataset(std::filesystem::path const& dir, bool silent)
       this->argvs_.push_back(s.data());
     }
     this->argc_ = this->args_.size();
-    this->app_.emplace(
-        std::make_unique<QApplication>(this->argc_, this->argvs_.data()));
+    this->app_ =
+        std::make_unique<QApplication>(this->argc_, this->argvs_.data());
   }
 }
 
@@ -40,6 +40,14 @@ void Dataset::append_participant(Subject const& subject) {
 
 std::filesystem::path const Dataset::bids_dir(void) const {
   return this->bids_dir_;
+}
+
+std::filesystem::path const Dataset::participants_filepath(void) const {
+  return this->participants_filepath_;
+}
+
+std::filesystem::path const Dataset::participants_sidecar_filepath(void) const {
+  return this->participants_sidecar_filepath_;
 }
 
 bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
@@ -75,15 +83,15 @@ std::vector<int> Dataset::get_existing_subjects(void) {
 }
 
 bool Dataset::is_subject(int idx) {
-  return this->get_subject<Subject>(idx).has_value();
+  return this->get_subject<Subject>(idx) != nullptr;
 }
 
 bool Dataset::is_silent(void) const { return this->silent_; }
 
 void Dataset::load_participants_table_(void) {
-  if (!std::filesystem::exists(this->participants_filepath)) return;
+  if (!std::filesystem::exists(this->participants_filepath_)) return;
 
-  std::ifstream participants_fs(this->participants_filepath);
+  std::ifstream participants_fs(this->participants_filepath_);
   std::string header_line(255, '\0');
   participants_fs.getline(header_line.data(), header_line.size());
   header_line = trim(header_line);
@@ -122,7 +130,7 @@ void Dataset::load_participants_table_(void) {
 }
 
 void Dataset::save_participants_table_(void) {
-  std::ofstream participants_fs(this->participants_filepath);
+  std::ofstream participants_fs(this->participants_filepath_);
 
   if (!participants_fs) return;
 

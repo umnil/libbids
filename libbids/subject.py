@@ -7,8 +7,7 @@ import pandas as pd  # type: ignore
 from pathlib import Path
 from PyQt6.QtWidgets import QMessageBox  # type: ignore
 from typing import Any, Dict, List, TYPE_CHECKING, Union
-from clibbids import Entity
-from .session import Session
+from clibbids import Entity, Session
 
 if TYPE_CHECKING:
     from .dataset import Dataset
