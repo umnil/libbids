@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 include(ExternalProject)
 include(FetchContent)
 set(PROJECT_NAME clibbids)
-project("${PROJECT_NAME}" VERSION 0.0.2 LANGUAGES CXX)
+project("${PROJECT_NAME}" VERSION 0.0.4 LANGUAGES CXX)
 
 SET(PY ON)
 set(CMAKE_CXX_STANDARD 20)
