@@ -10,7 +10,7 @@ authors = [ { name = "Kevin Davis", email = "kevin.davis@miami.edu" } ]
 dependencies = [
   "pandas",
   "pybids",
-  "PyQt6"
+  "PyQt5"
 ]
 
 [tools.setuptools.packages.find]
