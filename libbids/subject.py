@@ -2,12 +2,17 @@
 Defines an object that represents a subject
 """
 import os
+import sys
 import json
 import pandas as pd  # type: ignore
 from pathlib import Path
-from PyQt6.QtWidgets import QMessageBox  # type: ignore
 from typing import Any, Dict, List, TYPE_CHECKING, Union
-from clibbids import Entity, Session
+from .clibbids import Entity, Session
+
+if sys.platform == "win32":
+    from PyQt5.QtWidgets import QMessageBox  # type: ignore
+else:
+    from PyQt6.QtWidgets import QMessageBox  # type: ignore
 
 if TYPE_CHECKING:
     from .dataset import Dataset
