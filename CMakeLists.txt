@@ -12,6 +12,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+# Flags
+if(APPLE)
+    SET(CMAKE_CXXFLAGS "${CMAKE_CXXFLAGS} -mmacos-version-min=10.15")
+endif()
+
 # Insert Dependencies here
 FetchContent_Declare(
   pybind11
@@ -51,20 +56,20 @@ add_executable("${PROJECT_NAME}"
   src/dataset.cpp
   src/entity.cpp
   src/event.cpp
-	src/main.cpp
+  src/main.cpp
   src/session.cpp
   src/subject.cpp
   src/utils.cpp
 )
-endif()
-
+else()
 # Build the python module
 pybind11_add_module("${PROJECT_NAME}"
+  src/add.cpp
   src/entity.cpp
   src/ext.cpp
   src/session.cpp
-  src/subject.cpp
 )
+endif()
 
 # Include directories for your dependencies so that the #include directive
 # works
@@ -82,10 +87,12 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
 )
-target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
+#target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
 # Add Tests
+if(NOT PY)
 add_subdirectory(tests)
+endif()
 
 
 # INSTALL
