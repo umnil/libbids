@@ -32,11 +32,12 @@
 *.app
 
 # python
+*.pyd
 *.egg*/
 *__pycache__*
 
 # Build directory
-build/
+*build/
 dist/
 tests/gtest/
 *.zip
