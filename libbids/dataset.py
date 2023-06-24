@@ -12,7 +12,7 @@ from .subject import Subject
 
 
 class Dataset:
-    def __init__(self, bids_dir: Path):
+    def __init__(self, bids_dir: Path, silent: bool = False):
         """Initialize a BIDSDataset
 
         Parameters
@@ -22,6 +22,7 @@ class Dataset:
         """
         self.bids_dir: Path = bids_dir
         self.layout: BIDSLayout = BIDSLayout(str(self.bids_dir), validate=False)
+        self.silent: bool = silent
 
     def add_subject(self, *args, **kwargs) -> Optional[Subject]:
         """add a subject to the dataset. the arguments passed to this function
@@ -40,7 +41,9 @@ class Dataset:
             keys: List[str] = self.participants_properties[: len(args)]
             kwargs.update({k: v for k, v in zip(keys, args)})
 
-        if not self._confirm_add_subject(kwargs["participant_id"], kwargs["name"]):
+        if (not self.silent) and (
+            not self._confirm_add_subject(kwargs["participant_id"], kwargs["name"])
+        ):
             return self.get_subject(kwargs["participant_id"])
 
         subject = Subject(self, **kwargs)
@@ -87,6 +90,19 @@ class Dataset:
 
         data_dict: Dict = query.iloc[0, :].to_dict()
         return Subject(self, **data_dict)
+
+    def get_subjects(self) -> List[int]:
+        """Retreive a list of subject ids
+
+        Returns
+        -------
+        List[int]
+        """
+        participant_ids: List[str] = self.participant_table["participant_id"].values.tolist()
+        return [
+            int(ids[4:])
+            for ids in participant_ids
+        ]
 
     def is_subject(self, idx: int) -> bool:
         """determins if the subject with the provided id exists
