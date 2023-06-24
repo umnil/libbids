@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libbids"
-version = "0.0.5"
+version = "0.0.6"
 description = "Library for generating data using the Brain Imaging Data Structure"
 authors = [ { name = "Kevin Davis", email = "kevin.davis@miami.edu" } ]
 dependencies = [
