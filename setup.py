@@ -76,7 +76,7 @@ setup(
     ext_modules=[
         CMakeExtension(
             "clibbids",
-            build_dir=Path("build")
+            build_dir=Path("cmake_build")
         )
     ],
     cmdclass={"build_ext": CMakeExtBuilder},

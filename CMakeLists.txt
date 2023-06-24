@@ -76,7 +76,7 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 	PUBLIC
 		include
     ${JSON_INCLUDE_DIR}
-    ${Qt6Widgets_INCLUDE_DIRS}
+    # ${Qt6Widgets_INCLUDE_DIRS}
 )
 
 # Link your dependencies
@@ -84,7 +84,6 @@ target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
   # PRIVATE Qt6:Widgets
 )
-#target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
 # Add Tests
 if(NOT PY)
@@ -93,4 +92,4 @@ endif()
 
 
 # INSTALL
-install(TARGETS "${PROJECT_NAME}" DESTINATION bin)
+install(TARGETS "${PROJECT_NAME}" DESTINATION libbids)
