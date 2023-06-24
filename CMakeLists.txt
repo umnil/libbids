@@ -1,6 +1,3 @@
-# Replace values
-# ProjectName: Change to your project name
-
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 include(ExternalProject)
 include(FetchContent)
@@ -18,6 +15,8 @@ if(APPLE)
 endif()
 
 # Insert Dependencies here
+
+# PYBIND11
 FetchContent_Declare(
   pybind11
   GIT_REPOSITORY https://github.com/pybind/pybind11
@@ -25,29 +24,29 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pybind11)
 add_subdirectory("${pybind11_SOURCE_DIR}")
-set(JSON_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/json")
+
+# JSON
+set(JSON_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/jsoncpp-prefix/src/json-install")
 ExternalProject_Add(jsoncpp
-  PREFIX json
+  INSTALL_DIR "${JSON_INSTALL_DIR}"
   GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp
   GIT_TAG master
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${JSON_INSTALL_DIR}
 )
-set(JSON_PATH "${JSON_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}jsoncpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(JSON_LIB_FILENAME "${CMAKE_STATIC_LIBRARY_PREFIX}jsoncpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(JSON_LIB_PATH "${JSON_INSTALL_DIR}/lib/${JSON_LIB_FILENAME}")
 set(JSON_INCLUDE_DIR "${JSON_INSTALL_DIR}/include")
 message(STATUS "${JSON_INCLUDE_DIR}")
-message(STATUS "${JSON_PATH}")
+message(STATUS "${JSON_LIB_PATH}")
 add_library(json STATIC IMPORTED)
-set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_PATH}")
-
-# find_package
-# add_library
-# set_target_properties ## Where applicable
+set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_LIB_PATH}")
+add_dependencies(json jsoncpp)
 
 # Qt6
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-qt_standard_project_setup()
-message(STATUS "Qt6 Found: ${Qt6_FOUND}")
-message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
+# find_package(Qt6 REQUIRED COMPONENTS Widgets)
+# qt_standard_project_setup()
+# message(STATUS "Qt6 Found: ${Qt6_FOUND}")
+# message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
 
 # Build the app
 if(NOT PY)
@@ -80,12 +79,10 @@ target_include_directories("${PROJECT_NAME}" BEFORE
     ${Qt6Widgets_INCLUDE_DIRS}
 )
 
-# Link personally-made dependencies
-# add_subdirectory
-
 # Link your dependencies
 target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
+  # PRIVATE Qt6:Widgets
 )
 #target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
