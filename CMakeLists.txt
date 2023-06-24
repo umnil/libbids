@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 include(ExternalProject)
 include(FetchContent)
 set(PROJECT_NAME clibbids)
-project("${PROJECT_NAME}" VERSION 0.0.4 LANGUAGES CXX)
+project("${PROJECT_NAME}" VERSION 0.0.6 LANGUAGES CXX)
 
 SET(PY ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -27,15 +27,16 @@ add_subdirectory("${pybind11_SOURCE_DIR}")
 
 # JSON
 set(JSON_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/jsoncpp-prefix/src/json-install")
+set(JSON_LIB_FILENAME "${CMAKE_STATIC_LIBRARY_PREFIX}jsoncpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(JSON_LIB_PATH "${JSON_INSTALL_DIR}/lib/${JSON_LIB_FILENAME}")
+set(JSON_INCLUDE_DIR "${JSON_INSTALL_DIR}/include")
 ExternalProject_Add(jsoncpp
   INSTALL_DIR "${JSON_INSTALL_DIR}"
   GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp
   GIT_TAG master
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${JSON_INSTALL_DIR}
+  BUILD_BYPRODUCTS "${JSON_LIB_PATH}"
 )
-set(JSON_LIB_FILENAME "${CMAKE_STATIC_LIBRARY_PREFIX}jsoncpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(JSON_LIB_PATH "${JSON_INSTALL_DIR}/lib/${JSON_LIB_FILENAME}")
-set(JSON_INCLUDE_DIR "${JSON_INSTALL_DIR}/include")
 message(STATUS "${JSON_INCLUDE_DIR}")
 message(STATUS "${JSON_LIB_PATH}")
 add_library(json STATIC IMPORTED)
@@ -76,7 +77,7 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 	PUBLIC
 		include
     ${JSON_INCLUDE_DIR}
-    ${Qt6Widgets_INCLUDE_DIRS}
+    # ${Qt6Widgets_INCLUDE_DIRS}
 )
 
 # Link your dependencies
@@ -84,7 +85,6 @@ target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
   # PRIVATE Qt6:Widgets
 )
-#target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
 # Add Tests
 if(NOT PY)
@@ -93,4 +93,4 @@ endif()
 
 
 # INSTALL
-install(TARGETS "${PROJECT_NAME}" DESTINATION bin)
+install(TARGETS "${PROJECT_NAME}" DESTINATION libbids)

@@ -1,17 +1,20 @@
 [build-system]
-requires = ["setuptools", "wheel", "pybind11"]
+requires = ["setuptools", "wheel", "pybind11", "scikit-build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "libbids"
-version = "0.0.4"
+version = "0.0.6"
 description = "Library for generating data using the Brain Imaging Data Structure"
 authors = [ { name = "Kevin Davis", email = "kevin.davis@miami.edu" } ]
 dependencies = [
   "pandas",
   "pybids",
-  "PyQt6"
+  "PyQt5; sys_platform == 'win32'",
+  "PyQt6; sys_platform == 'darwin'"
 ]
 
 [tools.setuptools.packages.find]
+where = ["libbids"]
+include = ["build"]
 exclude = ["tests"]

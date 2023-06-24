@@ -2,13 +2,18 @@
 Supplemental pybids object for manipulating the dataset
 """
 import os
+import sys
 import json
 import pandas as pd  # type: ignore
 from bids.layout import BIDSLayout  # type: ignore
 from pathlib import Path
-from PyQt6.QtWidgets import QMessageBox, QWidget  # type: ignore
 from typing import Dict, List, Optional, cast
 from .subject import Subject
+
+if sys.platform == "win32":
+    from PyQt5.QtWidgets import QMessageBox, QWidget  # type: ignore
+else:
+    from PyQt6.QtWidgets import QMessageBox, QWidget  # type: ignore
 
 
 class Dataset:
