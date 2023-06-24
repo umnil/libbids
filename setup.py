@@ -22,7 +22,7 @@ class CMakeExtBuilder(build_ext):
         return super().build_extension(ext)
 
 
-class CMakeExtension(BaseExtension):
+class CMakeExtension(Pybind11Extension):
 
     def __init__(self, name, build_dir, *args, **kwargs):
         super().__init__(name, [], *args, **kwargs)
@@ -63,18 +63,20 @@ class CMakeExtension(BaseExtension):
         subprocess.run( ["cmake", "--build", "."], cwd=self.build_dir)
 
     def install(self, builder):
+        src_path = self.ext_file_path()
+        dst_path = Path(builder.get_ext_fullpath(self.name))
         if self.ext_file_path().exists():
-            path = Path(builder.get_ext_fullpath(self.name))
-            path.parent.mkdir(parents=True)
+            dst_path.parent.mkdir(exist_ok=True, parents=True)
 
             shutil.copyfile(
-                str(self.ext_file_path()),
-                builder.get_ext_fullpath(self.name)
+                str(src_path),
+                str(dst_path)
             )
         else:
             print(f"Error: specified file {self.ext_file_path} not found!", file=sys.stderr)
         
-        self.cleanup()
+        self.cleanup(builder)
+        print("CLEAN")
 
 
 setup(
