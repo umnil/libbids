@@ -65,7 +65,7 @@ class CMakeExtension(Pybind11Extension):
     def install(self, builder):
         src_path = self.ext_file_path()
         dst_path = Path(builder.get_ext_fullpath(self.name))
-        if self.ext_file_path().exists():
+        if self.ext_file_path() is not None:
             dst_path.parent.mkdir(exist_ok=True, parents=True)
 
             shutil.copyfile(
