@@ -32,6 +32,7 @@
 *.app
 
 # python
+*.pyd
 *.egg*/
 *__pycache__*
 

@@ -7,7 +7,8 @@ import shutil
 import warnings
 from pathlib import Path
 from pybind11.setup_helpers import Pybind11Extension, build_ext
-from setuptools import setup, find_packages
+from skbuild import setup
+from setuptools import find_packages
 from setuptools import Extension as BaseExtension
 
 
@@ -78,12 +79,12 @@ class CMakeExtension(Pybind11Extension):
 
 setup(
     name="libbids",
-    packages=find_packages(exclude=["tests", "src", "include", "toolchains"]),
-    ext_modules=[
-        CMakeExtension(
-            "clibbids",
-            build_dir=Path("cmake_build")
-        )
-    ],
-    cmdclass={"build_ext": CMakeExtBuilder},
+    packages=find_packages(exclude=["tests"])
+    # ext_modules=[
+    #     CMakeExtension(
+    #         "clibbids",
+    #         build_dir=Path("build")
+    #     )
+    # ],
+    # cmdclass={"build_ext": CMakeExtBuilder},
 )
