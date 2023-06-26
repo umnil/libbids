@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, List, TYPE_CHECKING, Union
 from .clibbids import Entity, Session
 
-if sys.platform == "win32":
-    from PyQt5.QtWidgets import QMessageBox  # type: ignore
-else:
+try:
     from PyQt6.QtWidgets import QMessageBox  # type: ignore
+except ModuleNotFoundError:
+    from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 if TYPE_CHECKING:
     from .dataset import Dataset

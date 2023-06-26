@@ -4,15 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libbids"
-version = "0.0.7"
+version = "0.0.8"
 description = "Library for generating data using the Brain Imaging Data Structure"
 authors = [ { name = "Kevin Davis", email = "kevin.davis@miami.edu" } ]
 dependencies = [
   "pandas",
   "pybids",
   "pyedflib",
-  "PyQt5; sys_platform == 'win32'",
-  "PyQt6; sys_platform == 'darwin'"
 ]
 
 [tools.setuptools.packages.find]
