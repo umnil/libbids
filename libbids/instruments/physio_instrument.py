@@ -1,114 +1,147 @@
-"""Instrument for stimulating or recording"""
-from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union, cast
-
+import numpy as np
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Tuple, Union, TYPE_CHECKING, cast
+from .instrument import Instrument
 from ..enums import Modality
 
 if TYPE_CHECKING:
     from ..session import Session
 
 
-class Instrument(ABC):
+class PhysioInstrument(Instrument):
+    """An instrument device capable of sampling data from a device"""
+
     def __init__(
         self,
         session: "Session",
-        modality: Union[Modality, str],
-        label: Optional[str] = None,
-        primary_modality: Optional[Union[Modality, str]] = None,
-        file_ext: str = "tsv",
+        device: Any,
+        sfreq: int,
+        electrodes: List[str],
+        physical_dimension: str = "mV",
+        physical_lim: Tuple = (-500.0, 500.0),
+        preamp_filter: str = "",
+        init_read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
+        read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
+        **kwargs
     ):
-        """Initialize an instrument that will write BIDS data
+        """Initialize a device for collecting physiology data
 
         Parameters
         ----------
         session : Session
-            The session that this instrument will be used in
-        modality : Union[Modality, str]
-            The type of data that this instrument is responsible for recording
-            or stimulating
-        label : Optional[str]
-            Only used for STIM and PHYSIO modalities. Will ensure any written
-            data files corresponding to this instrument have the appropriate
-            `recording-<label>` tag appended to files
-        primary_modality : Optional[Union[Modality, str]]
-            If the istrument is a STIM or PHYSIO, this indiciates to which
-            modality the data files should be written.
-        file_ext : str
-            The file extension of the associated file to save
+            Session currently using this instrument
+        device : Any
+            The a class that respresents a device hardware for recording
+        sfreq : int
+            The device's sampling frequency
+        electrodes: List[str]
+            A list of electrode names associated with the device
+        physical_dimension : str
+            The units of the signal
+        physical_lim : Tuple
+            The limits of the physical dimension
+        preamp_filter : str
+            Optionally supplied preamp filter settings for saving into the data
+            of the edf file
+        init_read_fn : Union[Tuple[str, List, Dict], Callable]
+            If a tuple of a string and then a dictionary, the first string is
+            the function name on `device` used for initializing reading, and the
+            list is args and the Dict is the kwargs. If this argument is
+            callable, the function is simply called
+        read_fn : Union[Tuple[str, Dict], Callable]
+            Similar to `init_read_fn`, but used for sampling data from the device
+        kwargs : Dict
+            This keyword arguments dictionary is used to supply detailes to the
+            edf file header. <See
+            https://pyedflib.readthedocs.io/en/latest/_modules/pyedflib/edfwriter.html#EdfWriter.setHeader>
         """
-        self.session: "Session" = session
-        self.modality: Modality = (
-            cast(Modality, modality)
-            if isinstance(modality, Modality)
-            else cast(Modality, Modality._member_map_[modality])
+        super(PhysioInstrument, self).__init__(
+            session,
+            Modality.PHYSIO,
+            label="emg",
+            primary_modality=Modality.EEG,
+            file_ext="edf",
         )
+        self.sfreq: int = sfreq
+        assert len(electrodes) > 1, "Must supply electrodes"
+        self.device: Any = device
+        self.electrodes: List[str] = electrodes
+        self.physical_dimension: str = physical_dimension
+        self.physical_lim: Tuple = physical_lim
+        self.preamp_filter: str = preamp_filter
+        self.init_read_fn: Union[Tuple[str, List, Dict], Callable] = init_read_fn
+        self.read_fn: Union[Tuple[str, List, Dict], Callable] = read_fn
+        self.modality_path.mkdir(exist_ok=True)
+        self.metadata: Dict = self._fixup_edf_metadata(kwargs)
+        self.buffer: np.ndarray
 
-        if label is not None:
-            assert not self.modality.is_primary
-            assert primary_modality is not None
-            self.label: str = label
-            self.primary_modality: Modality = (
-                cast(Modality, primary_modality)
-                if isinstance(primary_modality, Modality)
-                else cast(Modality, Modality._member_map_[cast(str, primary_modality)])
-            )
-            assert self.primary_modality.is_primary
+    def device_init_read(self, *args):
+        """Initializes reading on the device"""
+        if isinstance(self.init_read_fn, Callable):
+            self.init_read_fn()
 
-        self.file_ext: str = file_ext
+        fn, pargs, kwargs = cast(Tuple, self.init_read_fn)
+        args += tuple(pargs)
+        self.device.__getattribute__(fn)(*args, **kwargs)
 
-        self.task_id: str = ""
-        self.run_id: str = ""
-        self._started: bool = False
-        self.sfreq: int
+    def start(self, task: str, run_id: str):
+        """Begin recording a run
 
-    @abstractmethod
-    def start(self, task_id: str, run_id: str):
-        self.task_id = task_id
-        self.run_id = run_id
-        self._started = True
+        Parameters
+        ----------
+        task : str
+            The name of the task to be applied to the recorded file data
+        run_id : str
+            The id of the run that will be appended to the file
+        """
+        super().start(task, run_id)
+        self.device_init_read(task, run_id)
 
-    @abstractmethod
     def stop(self):
-        self.task_id = ""
-        self.run_id = ""
-        self._started = False
-
-    @property
-    def filename(self) -> str:
-        return (
-            "_".join(
-                [
-                    self.run_prefix,
-                    ("" if not hasattr(self, "label") else f"recording-{self.label}_")
-                    + self.modality.name.lower(),
-                ]
-            )
-            + f".{self.file_ext}"
+        self.device.stop(
+            metadata=self.metadata,
+            edf_filepath=self.filepath,
+            electrodes=self.electrodes,
         )
+        super(PhysioInstrument, self).stop()
 
-    @property
-    def filepath(self) -> Path:
-        return self.modality_path.joinpath(self.filename)
+    def write(self, event_data: str):
+        """TTL pulse
 
-    @property
-    def modality_path(self) -> Path:
-        return self.session.path.joinpath(
-            self.modality.name.lower()
-            if self.modality.is_primary
-            else self.primary_modality.name.lower()
-        )
+        Parameters
+        ----------
+        event_data: str
+        """
+        self.device.write(event_data)
 
-    @property
-    def run_prefix(self) -> str:
-        assert self.task_id != ""
-        assert self.run_id != ""
-        return "_".join([self.subject_id, self.session_id, self.task_id, self.run_id])
+    def _fixup_edf_metadata(self, metadata: Dict):
+        """A dictionary of values that will be used to store edf metadata
 
-    @property
-    def session_id(self) -> str:
-        return self.session.id
+        Parameters
+        ----------
+        metadata : Dict
+            The dictionary that will be parsed
+        """
+        required_keys: List[str] = [
+            "technician",
+            "recording_additional",
+            "patientname",
+            "patient_additional",
+            "patientcode",
+            "equipment",
+            "admincode",
+            "gender",
+            "startdate",
+            "birthdate",
+        ]
+        result: Dict = {}
+        for required_key in required_keys:
+            if required_key in metadata.keys():
+                value = metadata[required_key]
+            else:
+                value = ""
+                if required_key == "startdate":
+                    value = datetime.now()
+            result.update({required_key: value})
+        return result
 
-    @property
-    def subject_id(self) -> str:
-        return self.session.subject.path.name
