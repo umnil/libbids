@@ -10,10 +10,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, cast
 from .subject import Subject
 
-if sys.platform == "win32":
-    from PyQt5.QtWidgets import QMessageBox, QWidget  # type: ignore
-else:
+try:
     from PyQt6.QtWidgets import QMessageBox, QWidget  # type: ignore
+except ModuleNotFoundError:
+    from PyQt5.QtWidgets import QMessageBox, QWidget  # type: ignore
 
 
 class Dataset:
