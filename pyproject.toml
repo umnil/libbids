@@ -11,8 +11,6 @@ dependencies = [
   "pandas",
   "pybids",
   "pyedflib",
-  "PyQt5; sys_platform == 'win32'",
-  "PyQt6; sys_platform == 'darwin'"
 ]
 
 [tools.setuptools.packages.find]
