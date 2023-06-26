@@ -4,14 +4,14 @@ from abc import abstractmethod
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, TYPE_CHECKING
-from clibbids import Entity
+from .clibbids import Entity
 from .event import Event
 from .instruments import Instrument
 from .notes import Notes
 from .run import Run
 
 if TYPE_CHECKING:
-    from clibbids import Session
+    from .clibbids import Session
 
 
 class Task(Entity):

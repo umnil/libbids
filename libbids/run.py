@@ -4,7 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, List, Optional, TYPE_CHECKING, cast
 
-from clibbids import Entity
+from .clibbids import Entity
 from .event import Event
 
 if TYPE_CHECKING:
