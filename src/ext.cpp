@@ -32,5 +32,6 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("path", &Session::path)
       .def_property_readonly("prefix", &Session::prefix)
       .def_property_readonly("id", &Session::id)
-      .def_property_readonly("label", &Session::label);
+      .def_property_readonly("label", &Session::label)
+      .def_property_readonly("padding", &Session::padding);
 }
