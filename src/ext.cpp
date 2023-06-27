@@ -26,6 +26,7 @@ PYBIND11_MODULE(clibbids, m) {
           py::arg("name"), py::arg("key") = py::none(), py::arg("value") = "0",
           py::arg("padding") = 2)
       .def_property_readonly("id", &Entity::id)
+      .def_property_readonly("index", &Entity::index)
       .def_property_readonly("label", &Entity::label)
       .def_property_readonly("padding", &Entity::padding);
 
