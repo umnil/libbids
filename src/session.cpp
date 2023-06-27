@@ -12,13 +12,11 @@ Session::Session(py::object subject, int idx)
 }
 
 std::filesystem::path Session::path() const {
-  std::string path = this->subject_.attr("path").cast<std::string>();
-  std::filesystem::path subject_path(path);
-  // return this->subject_.path() / this->id();
+  std::filesystem::path subject_path =
+      this->subject_.attr("path").cast<std::filesystem::path>();
   return subject_path / this->id();
 }
 
 std::string Session::prefix() const {
-  std::string subject_id = this->subject_.attr("id").cast<std::string>();
-  return subject_id + "_" + this->id();
+  return this->subject_.attr("id").cast<std::string>() + "_" + this->id();
 }
