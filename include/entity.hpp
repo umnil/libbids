@@ -13,6 +13,7 @@ class Entity {
 
   std::string const& id(void) const;
   std::string const& label(void) const;
+  int const padding(void) const;
 
  protected:
   void set_key_(std::optional<std::string> const& key);

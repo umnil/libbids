@@ -70,3 +70,10 @@ class TestSession:
         # Check if the calculated prefix matches the expected prefix
         assert session.label == "03"
 
+    # test padding
+    def test_padding(self):
+        # Create a Session object with index 4
+        session: Session = Session(self.subject, 4)
+
+        # Check if the calculated prefix matches the expected prefix
+        assert session.padding == 2

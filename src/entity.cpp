@@ -23,6 +23,8 @@ std::string const& Entity::id(void) const { return this->id_; }
 
 std::string const& Entity::label(void) const { return this->label_; }
 
+int const Entity::padding(void) const { return this->padding_; }
+
 void Entity::set_key_(std::optional<std::string> const& key) {
   if (key.has_value())
     this->key_ = key.value();
