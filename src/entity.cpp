@@ -21,6 +21,8 @@ Entity::Entity(std::string name, std::optional<std::string> key,
 
 std::string const& Entity::id(void) const { return this->id_; }
 
+int const Entity::index(void) const { return this->index_; }
+
 std::string const& Entity::label(void) const { return this->label_; }
 
 int const Entity::padding(void) const { return this->padding_; }
