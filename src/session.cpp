@@ -20,3 +20,5 @@ std::filesystem::path Session::path() const {
 std::string Session::prefix() const {
   return this->subject_.attr("id").cast<std::string>() + "_" + this->id();
 }
+
+py::object Session::subject(void) const { return this->subject_; }
