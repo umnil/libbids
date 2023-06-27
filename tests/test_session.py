@@ -61,3 +61,12 @@ class TestSession:
 
         # Check if the calculated prefix matches the expected prefix
         assert session.prefix == expected_prefix
+
+    # test the label
+    def test_label(self):
+        # Create a Session object with index 3
+        session: Session = Session(self.subject, 3)
+
+        # Check if the calculated prefix matches the expected prefix
+        assert session.label == "03"
+
