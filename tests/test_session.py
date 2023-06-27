@@ -77,3 +77,11 @@ class TestSession:
 
         # Check if the calculated prefix matches the expected prefix
         assert session.padding == 2
+
+    # test index
+    def test_index(self):
+        # Creat a Session object with index 5
+        session: Session = Session(self.subject, 5)
+
+        # Check if the calculated index matches
+        assert session.index == 5
