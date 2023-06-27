@@ -25,8 +25,10 @@ class Session : public Entity {
   // Session(Subject const& subject, int idx);
   Session(py::object subject, int idx);
 
-  std::filesystem::path path() const;
-  std::string prefix() const;
+  std::filesystem::path path(void) const;
+  std::string prefix(void) const;
+
+  py::object subject(void) const;
 
  private:
   // Subject const& subject_;

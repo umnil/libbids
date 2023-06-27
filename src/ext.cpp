@@ -25,13 +25,16 @@ PYBIND11_MODULE(clibbids, m) {
           py::init<std::string, std::optional<std::string>, std::string, int>(),
           py::arg("name"), py::arg("key") = py::none(), py::arg("value") = "0",
           py::arg("padding") = 2)
-      .def_property_readonly("id", &Entity::id);
+      .def_property_readonly("id", &Entity::id)
+      .def_property_readonly("label", &Entity::label)
+      .def_property_readonly("padding", &Entity::padding);
 
   py::class_<Session>(m, "Session")
       .def(py::init<py::object, int>())
-      .def_property_readonly("path", &Session::path)
-      .def_property_readonly("prefix", &Session::prefix)
       .def_property_readonly("id", &Session::id)
       .def_property_readonly("label", &Session::label)
-      .def_property_readonly("padding", &Session::padding);
+      .def_property_readonly("path", &Session::path)
+      .def_property_readonly("padding", &Session::padding)
+      .def_property_readonly("prefix", &Session::prefix)
+      .def_property_readonly("subject", &Session::subject);
 }
