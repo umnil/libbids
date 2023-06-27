@@ -32,6 +32,7 @@ PYBIND11_MODULE(clibbids, m) {
   py::class_<Session>(m, "Session")
       .def(py::init<py::object, int>())
       .def_property_readonly("id", &Session::id)
+      .def_property_readonly("index", &Session::index)
       .def_property_readonly("label", &Session::label)
       .def_property_readonly("path", &Session::path)
       .def_property_readonly("padding", &Session::padding)
