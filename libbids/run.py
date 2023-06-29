@@ -121,8 +121,7 @@ class Run(Entity):
             self.n_samples += sample.shape[-1]
 
         # Final event
-        self.append_event(self.previous_event)
-        self.task.on_event_end(self.previous_event)
+        self.end_current_event()
 
         # Final sample
         self.task.process(True)
