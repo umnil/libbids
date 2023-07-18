@@ -47,7 +47,7 @@ jobs:
       
       # Python Build & Install
       - name: Python Build and Install
-        run: pip install .
+        run: python3 -m pip install .
       # - name: Windows Build
       # if: runner.os == 'Windows'
       # run: ./scripts/windows/build.bat
