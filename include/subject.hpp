@@ -1,5 +1,7 @@
 #ifndef INCLUDE_SUBJECT_HPP_
 #define INCLUDE_SUBJECT_HPP_
+#include <pybind11/pybind11.h>
+
 #include <filesystem>
 #include <map>
 #include <string>
@@ -7,21 +9,24 @@
 
 #include "entity.hpp"
 
-class Dataset;
+namespace py = pybind11;
+
+// class Dataset;
 class Session;
 
 class Subject : public Entity {
  public:
-  Subject(Dataset& dataset, std::map<std::string, std::string> const& args);
+  // Subject(Dataset& dataset, std::map<std::string, std::string> const& args);
+  Subject(py::object dataset, std::map<std::string, std::string> const& args);
+  Session add_session(bool silent = false);
   std::string const& get_participant_id() const;
   std::string const& get_participant_name() const;
-  std::filesystem::path path() const;
-  Session add_session();
-  Session get_session(int session_id);
-  int get_n_sessions() const;
-  std::map<std::string, std::string> const& to_dict(void) const;
-  bool confirm_add_session();
+  std::string const& get_participant_label() const;
   std::map<std::string, std::string> get_participant_sidecar() const;
+  int get_n_sessions() const;
+  Session get_session(int session_id);
+  std::filesystem::path path() const;
+  std::map<std::string, std::string> const& to_dict(void) const;
 
   Subject& operator=(Subject&& other);
 
@@ -32,8 +37,10 @@ class Subject : public Entity {
   T& operator[](std::string const& idx);
 
  private:
+  bool confirm_add_session_();
   static std::string ensure_participant_id_(std::string const& id);
-  Dataset& dataset_;
+  // Dataset& dataset_;
+  py::object dataset_;
   std::string participant_id_;
   std::string participant_name_;
   std::map<std::string, std::string> properties_;
