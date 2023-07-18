@@ -1,4 +1,5 @@
 #include <json/json.h>
+#include <pybind11/pybind11.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -10,7 +11,10 @@
 #include "session.hpp"
 #include "subject.hpp"
 
-Subject::Subject(Dataset& dataset,
+// Subject::Subject(Dataset& dataset,
+// std::map<std::string, std::string> const& args)
+//: Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
+Subject::Subject(py::object dataset,
                  std::map<std::string, std::string> const& args)
     : Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
   this->properties_["participant_id"] =
@@ -18,7 +22,16 @@ Subject::Subject(Dataset& dataset,
   this->participant_id_ = this->properties_["participant_id"];
   this->participant_name_ = this->properties_["name"];
   std::filesystem::create_directories(this->path());
-  this->set_label_(this->participant_id_.substr(4));
+  this->set_label_(this->get_participant_label());
+}
+
+Session Subject::add_session(bool silent) {
+  int n = this->get_n_sessions();
+  if (silent || this->confirm_add_session_()) {
+    return Session(*this, n + 1);
+  } else {
+    return get_session(n);
+  }
 }
 
 std::string const& Subject::get_participant_id() const {
@@ -29,22 +42,22 @@ std::string const& Subject::get_participant_name() const {
   return this->participant_name_;
 }
 
-std::filesystem::path Subject::path() const {
-  return this->dataset_.bids_dir() / this->participant_id_;
+std::string const& Subject::get_participant_label() const {
+  return this->participant_id_.substr(4);
 }
 
-Session Subject::add_session() {
-  int n = this->get_n_sessions();
-  if (this->dataset_.is_silent() && this->confirm_add_session()) {
-    return Session(*this, n + 1);
-  } else {
-    return get_session(n);
+std::map<std::string, std::string> Subject::get_participant_sidecar() const {
+  std::map<std::string, std::string> sidecar;
+  std::ifstream file(this->dataset_.participants_sidecar_filepath());
+  if (file.is_open()) {
+    Json::Value sidecar_json;
+    file >> sidecar_json;
+    // Convert the JSON Value to a map of strings
+    for (auto const& key : sidecar_json.getMemberNames()) {
+      sidecar[key] = sidecar_json[key].asString();
+    }
   }
-}
-
-Session Subject::get_session(int session_id) {
-  assert(session_id <= get_n_sessions());
-  return Session(*this, session_id);
+  return sidecar;
 }
 
 int Subject::get_n_sessions() const {
@@ -59,11 +72,30 @@ int Subject::get_n_sessions() const {
   return count;
 }
 
+Session Subject::get_session(int session_id) {
+  assert(session_id <= get_n_sessions());
+  return Session(*this, session_id);
+}
+
+std::filesystem::path Subject::path() const {
+  // return this->dataset_.bids_dir() / this->participant_id_;
+  return this->dataset_.attr("bids_dir")().cast<std::filesystem::path>() /
+         this->participant_id_;
+}
+
 std::map<std::string, std::string> const& Subject::to_dict(void) const {
   return this->properties_;
 }
 
-bool Subject::confirm_add_session() {
+Subject& Subject::operator=(Subject&& other) {
+  this->dataset_ = std::move(other.dataset_);
+  this->participant_id_ = other.participant_id_;
+  this->participant_name_ = other.participant_name_;
+  this->properties_ = other.properties_;
+  return *this;
+}
+
+bool Subject::confirm_add_session_() {
   int n_sessions = get_n_sessions();
   if (n_sessions > 0) {
     QMessageBox msgbox;
@@ -82,28 +114,6 @@ bool Subject::confirm_add_session() {
   } else {
     return true;
   }
-}
-
-std::map<std::string, std::string> Subject::get_participant_sidecar() const {
-  std::map<std::string, std::string> sidecar;
-  std::ifstream file(this->dataset_.participants_sidecar_filepath());
-  if (file.is_open()) {
-    Json::Value sidecar_json;
-    file >> sidecar_json;
-    // Convert the JSON Value to a map of strings
-    for (auto const& key : sidecar_json.getMemberNames()) {
-      sidecar[key] = sidecar_json[key].asString();
-    }
-  }
-  return sidecar;
-}
-
-Subject& Subject::operator=(Subject&& other) {
-  this->dataset_ = std::move(other.dataset_);
-  this->participant_id_ = other.participant_id_;
-  this->participant_name_ = other.participant_name_;
-  this->properties_ = other.properties_;
-  return *this;
 }
 
 std::string Subject::ensure_participant_id_(std::string const& id) {
