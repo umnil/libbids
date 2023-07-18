@@ -59,7 +59,9 @@ jobs:
       
       # Test
       - name: Python Test
-        run: python -m pytest ./tests
+        run: |
+          python3 -m pip install pytest
+          python3 -m pytest ./tests
       #- name: Windows Test
       # if: runner.os == 'Windows'
       # run: ./build/tests/Release/helloTest.exe
