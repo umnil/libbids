@@ -39,16 +39,21 @@ jobs:
           python-version: 3.9
 
       # Binary Dependencies
+      - name: Common Dependencies
+        run: |
+          conda install -c conda-forge -y qt6-main
+          python3 -m pip install PyQt6
+          python3 -m pip install pytest
       - name: Windows Dependencies
         if: runner.os == 'Windows'
         run: ./scripts/windows/install-dependencies.bat
       - name: MacOS Dependencies
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         run: |
           chmod +x ./scripts/osx/install-dependencies.sh
           ./scripts/osx/install-dependencies.sh
       - name: Linux Dependencies
-        if: runner.os == "Linux"
+        if: runner.os == 'Linux'
         run: |
           chmod +x ./scripts/linux/install-dependencies.sh
           ./scripts/linux/install-dependencies.sh
@@ -72,9 +77,6 @@ jobs:
       # Test
       - name: Python Test
         run: |
-          conda install -c conda-forge -y qt6-main
-          python3 -m pip install PyQt6
-          python3 -m pip install pytest
           python3 -m pytest ./tests
       #- name: Windows Test
       # if: runner.os == 'Windows'
