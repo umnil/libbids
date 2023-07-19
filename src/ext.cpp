@@ -1,6 +1,7 @@
 #include <pybind11/complex.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl/filesystem.h>
 
 #include <memory>
 
@@ -43,15 +44,24 @@ PYBIND11_MODULE(clibbids, m) {
 
   py::class_<Subject>(m, "Subject")
       .def(py::init<py::object, std::map<std::string, std::string>>())
+      .def("__getitem__",
+           [](Subject& self, std::string const& key) { return self[key]; })
+      .def("add_session", &Subject::add_session)
       .def_property_readonly("dataset", &Subject::dataset)
       .def("ensure_participant_id",
            static_cast<std::string (*)(std::string const&)>(
                &Subject::ensure_participant_id))
       .def("ensure_participant_id",
            static_cast<std::string (*)(int)>(&Subject::ensure_participant_id))
+      .def("get_participant_id", &Subject::get_participant_id)
+      .def("get_participant_name", &Subject::get_participant_name)
+      .def("get_participant_label", &Subject::get_participant_label)
+      .def("get_participant_sidecar", &Subject::get_participant_sidecar)
+      .def("get_n_sessions", &Subject::get_n_sessions)
       .def_property_readonly("id", &Subject::id)
       .def_property_readonly("index", &Subject::index)
       .def_property_readonly("label", &Subject::label)
       .def_property_readonly("path", &Subject::path)
-      .def_property_readonly("padding", &Subject::padding);
+      .def_property_readonly("padding", &Subject::padding)
+      .def("to_dict", &Subject::to_dict);
 }
