@@ -1,5 +1,6 @@
 #include <json/json.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl/filesystem.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -11,6 +12,8 @@
 #include "session.hpp"
 #include "subject.hpp"
 
+namespace py = pybind11;
+
 // Subject::Subject(Dataset& dataset,
 // std::map<std::string, std::string> const& args)
 //: Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
@@ -18,7 +21,7 @@ Subject::Subject(py::object dataset,
                  std::map<std::string, std::string> const& args)
     : Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
   this->properties_["participant_id"] =
-      this->ensure_participant_id_(this->properties_["participant_id"]);
+      this->ensure_participant_id(this->properties_["participant_id"]);
   this->participant_id_ = this->properties_["participant_id"];
   this->participant_name_ = this->properties_["name"];
   std::filesystem::create_directories(this->path());
@@ -34,6 +37,28 @@ Session Subject::add_session(bool silent) {
   }
 }
 
+py::object Subject::dataset(void) const { return this->dataset_; }
+
+std::string Subject::ensure_participant_id(std::string const& id) {
+  std::string retval;
+  if (std::isdigit(id[0])) {
+    int int_id = std::stoi(id);
+    retval = "sub-" + std::to_string(int_id);
+  } else {
+    retval = id;
+    if (retval.substr(0, 4) != "sub-") {
+      retval = "sub-" + retval;
+    }
+  }
+  return retval;
+}
+
+std::string Subject::ensure_participant_id(int id) {
+  std::string retval;
+  retval = "sub-" + std::to_string(id);
+  return retval;
+}
+
 std::string const& Subject::get_participant_id() const {
   return this->participant_id_;
 }
@@ -42,13 +67,14 @@ std::string const& Subject::get_participant_name() const {
   return this->participant_name_;
 }
 
-std::string const& Subject::get_participant_label() const {
+std::string Subject::get_participant_label() const {
   return this->participant_id_.substr(4);
 }
 
 std::map<std::string, std::string> Subject::get_participant_sidecar() const {
   std::map<std::string, std::string> sidecar;
-  std::ifstream file(this->dataset_.participants_sidecar_filepath());
+  std::ifstream file(
+      this->dataset_.attr("participants_sidecar_filepath").cast<std::string>());
   if (file.is_open()) {
     Json::Value sidecar_json;
     file >> sidecar_json;
@@ -79,7 +105,7 @@ Session Subject::get_session(int session_id) {
 
 std::filesystem::path Subject::path() const {
   // return this->dataset_.bids_dir() / this->participant_id_;
-  return this->dataset_.attr("bids_dir")().cast<std::filesystem::path>() /
+  return this->dataset_.attr("bids_dir").cast<std::filesystem::path>() /
          this->participant_id_;
 }
 
@@ -87,13 +113,13 @@ std::map<std::string, std::string> const& Subject::to_dict(void) const {
   return this->properties_;
 }
 
-Subject& Subject::operator=(Subject&& other) {
-  this->dataset_ = std::move(other.dataset_);
-  this->participant_id_ = other.participant_id_;
-  this->participant_name_ = other.participant_name_;
-  this->properties_ = other.properties_;
-  return *this;
-}
+// Subject& Subject::operator=(Subject&& other) {
+// this->dataset_ = std::move(other.dataset_);
+// this->participant_id_ = other.participant_id_;
+// this->participant_name_ = other.participant_name_;
+// this->properties_ = other.properties_;
+// return *this;
+//}
 
 bool Subject::confirm_add_session_() {
   int n_sessions = get_n_sessions();
@@ -114,18 +140,4 @@ bool Subject::confirm_add_session_() {
   } else {
     return true;
   }
-}
-
-std::string Subject::ensure_participant_id_(std::string const& id) {
-  std::string retval;
-  if (std::isdigit(id[0])) {
-    int int_id = std::stoi(id);
-    retval = "sub-" + std::to_string(int_id);
-  } else {
-    retval = id;
-    if (retval.substr(0, 4) != "sub-") {
-      retval = "sub-" + retval;
-    }
-  }
-  return retval;
 }

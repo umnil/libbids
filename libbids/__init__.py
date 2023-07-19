@@ -1,2 +1,2 @@
 from .dataset import Dataset
-from .subject import Subject
+from .clibbids import Subject
