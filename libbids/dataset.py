@@ -8,7 +8,7 @@ import pandas as pd  # type: ignore
 from bids.layout import BIDSLayout  # type: ignore
 from pathlib import Path
 from typing import Dict, List, Optional, cast
-from .subject import Subject
+from .clibbids import Subject
 
 try:
     from PyQt6.QtWidgets import QMessageBox, QWidget  # type: ignore
@@ -51,7 +51,7 @@ class Dataset:
         ):
             return self.get_subject(kwargs["participant_id"])
 
-        subject = Subject(self, **kwargs)
+        subject = Subject(self, kwargs)
         if subject.participant_label not in self.layout.get_subjects():
             self.append_participant(subject)
 

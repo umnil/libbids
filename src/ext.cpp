@@ -7,6 +7,7 @@
 #include "add.hpp"
 #include "entity.hpp"
 #include "session.hpp"
+#include "subject.hpp"
 
 namespace py = pybind11;
 
@@ -31,7 +32,7 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("padding", &Entity::padding);
 
   py::class_<Session>(m, "Session")
-      .def(py::init<py::object, int>())
+      .def(py::init<Subject, int>())
       .def_property_readonly("id", &Session::id)
       .def_property_readonly("index", &Session::index)
       .def_property_readonly("label", &Session::label)
@@ -39,4 +40,18 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("padding", &Session::padding)
       .def_property_readonly("prefix", &Session::prefix)
       .def_property_readonly("subject", &Session::subject);
+
+  py::class_<Subject>(m, "Subject")
+      .def(py::init<py::object, std::map<std::string, std::string>>())
+      .def_property_readonly("dataset", &Subject::dataset)
+      .def("ensure_participant_id",
+           static_cast<std::string (*)(std::string const&)>(
+               &Subject::ensure_participant_id))
+      .def("ensure_participant_id",
+           static_cast<std::string (*)(int)>(&Subject::ensure_participant_id))
+      .def_property_readonly("id", &Subject::id)
+      .def_property_readonly("index", &Subject::index)
+      .def_property_readonly("label", &Subject::label)
+      .def_property_readonly("path", &Subject::path)
+      .def_property_readonly("padding", &Subject::padding);
 }
