@@ -51,8 +51,10 @@ void Entity::set_label_(int value) {
 void Entity::set_label_(std::string const& value) {
   try {
     this->index_ = std::stoi(value);
+    return this->set_label_(this->index_);
   } catch (std::invalid_argument const& ex) {
     this->index_ = -1;
   }
+  this->label_ = value;
   this->id_ = this->key_ + "-" + this->label_;
 }
