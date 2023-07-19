@@ -44,10 +44,10 @@ set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_LIB_PATH}")
 add_dependencies(json jsoncpp)
 
 # Qt6
-# find_package(Qt6 REQUIRED COMPONENTS Widgets)
-# qt_standard_project_setup()
-# message(STATUS "Qt6 Found: ${Qt6_FOUND}")
-# message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
+message(STATUS "Qt6 Found: ${Qt6_FOUND}")
+message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
 
 # Build the app
 if(NOT PY)
@@ -68,6 +68,7 @@ pybind11_add_module("${PROJECT_NAME}"
   src/entity.cpp
   src/ext.cpp
   src/session.cpp
+  src/subject.cpp
 )
 endif()
 
@@ -77,13 +78,13 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 	PUBLIC
 		include
     ${JSON_INCLUDE_DIR}
-    # ${Qt6Widgets_INCLUDE_DIRS}
+    ${Qt6Widgets_INCLUDE_DIRS}
 )
 
 # Link your dependencies
 target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
-  # PRIVATE Qt6:Widgets
+  PRIVATE Qt6::Widgets
 )
 
 # Add Tests
