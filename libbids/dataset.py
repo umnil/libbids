@@ -52,11 +52,11 @@ class Dataset:
             return self.get_subject(kwargs["participant_id"])
 
         subject = Subject(self, kwargs)
-        if subject.participant_label not in self.layout.get_subjects():
+        if subject.get_participant_label() not in self.layout.get_subjects():
             self.append_participant(subject)
 
         os.makedirs(
-            os.path.join(self.layout.root, subject.participant_id), exist_ok=True
+            os.path.join(self.layout.root, subject.get_participant_id()), exist_ok=True
         )
         self.layout = BIDSLayout(self.layout.root, validate=False)
         return subject
@@ -71,8 +71,10 @@ class Dataset:
         """
         fn: str = "participants.tsv"
         fp: str = os.path.join(self.layout.root, fn)
+        subject_data: dict = subject.to_dict()
+        subject_table: pd.DataFrame = pd.DataFrame(pd.Series(subject_data))
         participant_data: pd.DataFrame = pd.concat(
-            [self.participant_table, subject.participant_data()], ignore_index=True
+            [self.participant_table, subject_table], ignore_index=True
         )
         participant_data.to_csv(fp, sep="\t", index=False)
 
@@ -89,12 +91,15 @@ class Dataset:
         Optional[Subject]
         """
         participant_id: str = Subject.ensure_participant_id(idx)
+        print(participant_id)
         query = self.participant_table.query(f"participant_id == '{participant_id}'")
+        print(query)
+        print(query.shape)
         if query.shape[0] < 1:
             return None
 
         data_dict: Dict = query.iloc[0, :].to_dict()
-        return Subject(self, **data_dict)
+        return Subject(self, data_dict)
 
     def get_subjects(self) -> List[int]:
         """Retreive a list of subject ids

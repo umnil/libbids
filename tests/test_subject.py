@@ -39,5 +39,48 @@ class TestSubject:
         # Clean up the temporary test directory and files
         shutil.rmtree(self.test_dir)
 
-    def test_one(self):
-        raise Exception("Unimplemented Tests")
+    # Test the path() method of Subject
+    def test_path_test(self):
+        # Create a Subject object with index 1
+        subject: Subject = Subject(self.dataset, dict(name="Jacob", participant_id="sub-01"))
+
+        # Expected path: subject path + session id
+        expected_path: Path = self.dataset.bids_dir / "sub-01"
+
+        # Check if the calculated path matches the expected path
+        assert subject.path == expected_path
+
+    # Test the prefix() method of Subject
+    def test_prefix(self):
+        # Create a Subject object with index 2
+        subject: n = Subject(self.dataset, dict(participant_id="02"))
+
+        # Expected prefix: subject id + "_" + session id
+        expected_prefix: str = "sub-02"
+
+        # Check if the calculated prefix matches the expected prefix
+        assert subject.id == expected_prefix
+
+    # test the label
+    def test_label(self):
+        # Create a Subject object with index 3
+        subject: Subject = Subject(self.dataset, dict(participant_id="sub-03"))
+
+        # Check if the calculated prefix matches the expected prefix
+        assert subject.get_participant_label() == "03"
+
+    # test padding
+    # def test_padding(self):
+        # Create a Session object with index 4
+        # session: Session = Session(self.subject, 4)
+
+        # Check if the calculated prefix matches the expected prefix
+        # assert session.padding == 2
+
+    # test index
+    # def test_index(self):
+        # Creat a Session object with index 5
+        # session: Session = Session(self.subject, 5)
+
+        # Check if the calculated index matches
+        # assert session.index == 5
