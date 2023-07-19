@@ -67,7 +67,8 @@ jobs:
       # Test
       - name: Python Test
         run: |
-          conda install -y PyQt6
+          conda install -c conda-forge -y qt6-main
+          python3 -m pip install PyQt6
           python3 -m pip install pytest
           python3 -m pytest ./tests
       #- name: Windows Test
