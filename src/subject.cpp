@@ -1,5 +1,6 @@
 #include <json/json.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include <QMessageBox>
@@ -43,7 +44,7 @@ std::string Subject::ensure_participant_id(std::string const& id) {
   std::string retval;
   if (std::isdigit(id[0])) {
     int int_id = std::stoi(id);
-    retval = "sub-" + std::to_string(int_id);
+    retval = Subject::ensure_participant_id(int_id);
   } else {
     retval = id;
     if (retval.substr(0, 4) != "sub-") {
@@ -54,9 +55,11 @@ std::string Subject::ensure_participant_id(std::string const& id) {
 }
 
 std::string Subject::ensure_participant_id(int id) {
-  std::string retval;
-  retval = "sub-" + std::to_string(id);
-  return retval;
+  std::string retval = std::to_string(id);
+  int n_chars = retval.size() > 2 ? 2 : retval.size();
+  int n_chars_needed = 2 - n_chars;
+  std::string padding(n_chars_needed, '0');
+  return std::string("sub-") + padding + retval;
 }
 
 std::string const& Subject::get_participant_id() const {
