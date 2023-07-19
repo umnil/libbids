@@ -55,7 +55,8 @@ jobs:
       - name: Linux Dependencies
         if: runner.os == 'Linux'
         run: |
-          conda install -c conda-forge -y mesa-libegl-devel-cos6-x86_64
+          sudo apt update
+          sudo apt install libegl1 -y
 
       # Python Build & Install
       - name: Python Build and Install
