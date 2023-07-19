@@ -55,8 +55,7 @@ jobs:
       - name: Linux Dependencies
         if: runner.os == 'Linux'
         run: |
-          chmod +x ./scripts/linux/install-dependencies.sh
-          ./scripts/linux/install-dependencies.sh
+          conda install -c conda-forge mesa-libegl-devel-cos6-x86_64
 
       # Python Build & Install
       - name: Python Build and Install
