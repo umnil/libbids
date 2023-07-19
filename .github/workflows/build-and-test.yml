@@ -42,11 +42,16 @@ jobs:
       - name: Windows Dependencies
         if: runner.os == 'Windows'
         run: ./scripts/windows/install-dependencies.bat
-      - name: Nix Dependencies
-        if: runner.os != 'Windows'
+      - name: MacOS Dependencies
+        if: runner.os == 'MacOS'
         run: |
           chmod +x ./scripts/osx/install-dependencies.sh
           ./scripts/osx/install-dependencies.sh
+      - name: Linux Dependencies
+        if: runner.os == "Linux"
+        run: |
+          chmod +x ./scripts/linux/install-dependencies.sh
+          ./scripts/linux/install-dependencies.sh
 
       # Python Build & Install
       - name: Python Build and Install
