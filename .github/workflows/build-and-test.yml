@@ -34,8 +34,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.9
 
-      # Dependencies
+      # Binary Dependencies
       - name: Windows Dependencies
         if: runner.os == 'Windows'
         run: ./scripts/windows/install-dependencies.bat
@@ -44,7 +47,7 @@ jobs:
         run: |
           chmod +x ./scripts/osx/install-dependencies.sh
           ./scripts/osx/install-dependencies.sh
-      
+
       # Python Build & Install
       - name: Python Build and Install
         run: |
@@ -64,8 +67,8 @@ jobs:
       # Test
       - name: Python Test
         run: |
+          conda install -y PyQt6
           python3 -m pip install pytest
-          python3 -m pip install PyQt6
           python3 -m pytest ./tests
       #- name: Windows Test
       # if: runner.os == 'Windows'
