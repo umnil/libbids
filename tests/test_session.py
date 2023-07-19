@@ -3,8 +3,8 @@ import shutil
 import tempfile
 
 from pathlib import Path
-from libbids import Dataset, Subject
-from libbids.clibbids import Session
+from libbids import Dataset
+from libbids.clibbids import Session, Subject
 
 # Test fixture for Session class
 class TestSession: 
