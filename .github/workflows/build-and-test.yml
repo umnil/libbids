@@ -55,8 +55,8 @@ jobs:
       - name: Linux Dependencies
         if: runner.os == 'Linux'
         run: |
-          sudo chmod +x ./scripts/osx/install-dependencies.sh
-          sudo ./scripts/osx/install-dependencies.sh
+          sudo chmod +x ./scripts/linux/install-dependencies.sh
+          sudo ./scripts/linux/install-dependencies.sh
 
       # Python Build & Install
       - name: Python Build and Install
