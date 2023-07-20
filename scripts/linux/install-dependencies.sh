@@ -13,4 +13,4 @@ apt-get update
 apt-get upgrade
 apt-get install -y libgl1-mesa-dev
 apt-get install -y libxkbcommon-dev
-apt-get install -y libvulkan1 mesa-vulkan-drivers vulkan-utils
+apt-get install -y libvulkan1 mesa-vulkan-drivers vulkan-tools
