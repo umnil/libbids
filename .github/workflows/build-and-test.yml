@@ -66,7 +66,9 @@ jobs:
       - name: Windows Install
         if: runner.os == 'Windows'
         shell: pwsh
-        run: cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
+        run: |
+          cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
+          ls ./libbids/
         
       - name: nix install
         if: runner.os != 'Windows'
