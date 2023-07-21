@@ -64,11 +64,13 @@ jobs:
           python3 -m pip install --verbose .
 
       - name: Windows Install
+        if: runner.os == 'Windows'
         shell: pwsh
         run: cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
         
       - name: nix install
-        run: cp _skbuild/**/cmake-install/libbids/cllibds* ./libbids/
+        if: runner.os != 'Windows'
+        run: cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
       # - name: Windows Build
       # if: runner.os == 'Windows'
       # run: ./scripts/windows/build.bat
