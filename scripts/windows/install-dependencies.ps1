@@ -1,2 +1,2 @@
 Write-Output "Install Windows Dependencies!"
-conda install -c conda-forge -y qt6-main
+conda install -c conda-forge -y qt6-main jsoncpp
