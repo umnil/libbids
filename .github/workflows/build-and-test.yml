@@ -51,7 +51,7 @@ jobs:
       - name: Windows Dependencies
         if: runner.os == 'Windows'
         run: |
-          conda install -y -c conda-forge qt6-base
+          conda install -y -c conda-forge qt6-main
           conda install -y jsoncpp
       - name: MacOS Dependencies
         if: runner.os == 'macOS'
