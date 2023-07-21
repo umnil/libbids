@@ -70,7 +70,7 @@ jobs:
         shell: pwsh
         run: |
           cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
-          cp _skbuild/**/cmake-build/jsconcpp-prefix/src/json-install/bin/jsoncpp* ./libbids/
+          cp _skbuild/**/cmake-build/jsoncpp-prefix/src/json-install/bin/jsoncpp* ./libbids/
           ls ./libbids/
         
       - name: nix install
