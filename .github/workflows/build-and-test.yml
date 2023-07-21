@@ -30,6 +30,10 @@ jobs:
           - windows-latest
           - macos-latest
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -46,8 +50,9 @@ jobs:
           python3 -m pip install -r requirements.txt
       - name: Windows Dependencies
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: ./scripts/windows/install-dependencies.ps1
+        run: |
+          conda install -y -c conda-forge qt6-base
+          conda install -y jsoncpp
       - name: MacOS Dependencies
         if: runner.os == 'macOS'
         run: |
