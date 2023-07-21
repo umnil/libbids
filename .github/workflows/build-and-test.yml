@@ -62,8 +62,13 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --verbose .
-          # Needed for some systems that run the library inplace
-          cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
+
+      - name: Windows Install
+        shell: pwsh
+        run: cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
+        
+      - name: nix install
+        run: cp _skbuild/**/cmake-install/libbids/cllibds* ./libbids/
       # - name: Windows Build
       # if: runner.os == 'Windows'
       # run: ./scripts/windows/build.bat
