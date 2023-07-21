@@ -37,11 +37,12 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: "3.10"
+          auto-activate-base: true
+          activate-environment: test
 
       # Binary Dependencies
       - name: Common Dependencies
         run: |
-          conda activate test
           python3 -m pip install -r requirements.txt
       - name: Windows Dependencies
         if: runner.os == 'Windows'
@@ -61,7 +62,6 @@ jobs:
       # Python Build & Install
       - name: Python Build and Install
         run: |
-          conda activate test
           python3 -m pip install --upgrade pip
           python3 -m pip install --verbose .
 
@@ -87,7 +87,6 @@ jobs:
       # Test
       - name: Python Test
         run: |
-          conda activate test
           python3 -m pytest ./tests
       #- name: Windows Test
       # if: runner.os == 'Windows'
