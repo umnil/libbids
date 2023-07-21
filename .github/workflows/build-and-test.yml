@@ -74,7 +74,9 @@ jobs:
         
       - name: nix install
         if: runner.os != 'Windows'
-        run: cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
+        run: |
+          cp _skbuild/**/cmake-install/jsconcpp-prefix/src/json-install/bin/jsoncpp* ./libbids/
+          cp _skbuild/**/cmake-install/libbids/clibbids* ./libbids/
       # - name: Windows Build
       # if: runner.os == 'Windows'
       # run: ./scripts/windows/build.bat
