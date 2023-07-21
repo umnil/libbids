@@ -10,8 +10,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # Flags
+if(UNIX AND NOT APPLE)
+	set(LINUX ON)
+endif()
 if(APPLE)
-    SET(CMAKE_CXXFLAGS "${CMAKE_CXXFLAGS} -mmacos-version-min=10.15")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacos-version-min=10.15")
+elseif(LINUX)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 # Insert Dependencies here
@@ -34,7 +39,7 @@ ExternalProject_Add(jsoncpp
   INSTALL_DIR "${JSON_INSTALL_DIR}"
   GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp
   GIT_TAG master
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${JSON_INSTALL_DIR}
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${JSON_INSTALL_DIR} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
   BUILD_BYPRODUCTS "${JSON_LIB_PATH}"
 )
 message(STATUS "${JSON_INCLUDE_DIR}")
@@ -45,7 +50,9 @@ add_dependencies(json jsoncpp)
 
 # Qt6
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-qt_standard_project_setup()
+if(NOT LINUX)
+	qt_standard_project_setup()
+endif()
 message(STATUS "Qt6 Found: ${Qt6_FOUND}")
 message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
 
