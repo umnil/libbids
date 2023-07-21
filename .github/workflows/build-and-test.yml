@@ -44,7 +44,8 @@ jobs:
           python3 -m pip install -r requirements.txt
       - name: Windows Dependencies
         if: runner.os == 'Windows'
-        run: ./scripts/windows/install-dependencies.bat
+        shell: pwsh
+        run: ./scripts/windows/install-dependencies.ps1
       - name: MacOS Dependencies
         if: runner.os == 'macOS'
         run: |
