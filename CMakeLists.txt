@@ -49,18 +49,18 @@ set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_LIB_PATH}")
 add_dependencies(json jsoncpp)
 
 # Qt6
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-if(NOT LINUX)
-	qt_standard_project_setup()
-endif()
-message(STATUS "Qt6 Found: ${Qt6_FOUND}")
-message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
+#find_package(Qt6 REQUIRED COMPONENTS Widgets)
+#if(NOT LINUX)
+	#qt_standard_project_setup()
+#endif()
+#message(STATUS "Qt6 Found: ${Qt6_FOUND}")
+#message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
 
 # Build the app
 if(NOT PY)
 add_executable("${PROJECT_NAME}"
 	# List your files to include in the project
-  src/dataset.cpp
+  #src/dataset.cpp
   src/entity.cpp
   src/event.cpp
   src/main.cpp
@@ -85,13 +85,13 @@ target_include_directories("${PROJECT_NAME}" BEFORE
 	PUBLIC
 		include
     ${JSON_INCLUDE_DIR}
-    ${Qt6Widgets_INCLUDE_DIRS}
+    #${Qt6Widgets_INCLUDE_DIRS}
 )
 
 # Link your dependencies
 target_link_libraries("${PROJECT_NAME}"
   PUBLIC json
-  PRIVATE Qt6::Widgets
+  #PRIVATE Qt6::Widgets
 )
 
 # Add Tests

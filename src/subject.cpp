@@ -3,13 +3,10 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
-#include <QMessageBox>
-#include <QPushButton>
 #include <fstream>
 #include <map>
 #include <optional>
 
-#include "dataset.hpp"
 #include "session.hpp"
 #include "subject.hpp"
 
@@ -127,19 +124,10 @@ std::map<std::string, std::string> const& Subject::to_dict(void) const {
 bool Subject::confirm_add_session_() {
   int n_sessions = get_n_sessions();
   if (n_sessions > 0) {
-    QMessageBox msgbox;
-    msgbox.setText(QString("OK to start new session: #") +
-                   QString::number(n_sessions + 1) + QString("?"));
-    QPushButton* ybtn = msgbox.addButton(QString("Ok"), QMessageBox::YesRole);
-    QPushButton* nbtn = msgbox.addButton(
-        QString("No, use previous session #") + QString::number(n_sessions),
-        QMessageBox::NoRole);
-    msgbox.exec();
-    if (msgbox.clickedButton() == ybtn) {
-      return true;
-    } else {
-      return false;
-    }
+    std::string prompt = std::string("OK to start new session: ") +
+                         std::to_string(n_sessions + 1) + "?";
+    py::object qprompt = py::module_::import("libbids").attr("qprompt");
+    return qprompt(prompt, "OK", "No. Use previous session").cast<bool>();
   } else {
     return true;
   }
