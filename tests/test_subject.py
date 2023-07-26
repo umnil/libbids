@@ -69,18 +69,12 @@ class TestSubject:
         # Check if the calculated prefix matches the expected prefix
         assert subject.get_participant_label() == "03"
 
-    # test padding
-    # def test_padding(self):
-        # Create a Session object with index 4
-        # session: Session = Session(self.subject, 4)
+    # Test adding a session
+    def test_add_session(self):
+        # Create a Subject object with index 4
+        subject: Subject = Subject(self.dataset, dict(participant_id="sub-04", name="J'Dinklage Morgoon"))
 
-        # Check if the calculated prefix matches the expected prefix
-        # assert session.padding == 2
+        # Create a session on the subject
+        session: Session = subject.add_session(silent=True)
 
-    # test index
-    # def test_index(self):
-        # Creat a Session object with index 5
-        # session: Session = Session(self.subject, 5)
-
-        # Check if the calculated index matches
-        # assert session.index == 5
+        assert session is not None
