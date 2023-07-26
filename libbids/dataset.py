@@ -91,14 +91,11 @@ class Dataset:
         Optional[Subject]
         """
         participant_id: str = Subject.ensure_participant_id(idx)
-        print(participant_id)
         query = self.participant_table.query(f"participant_id == '{participant_id}'")
-        print(query)
-        print(query.shape)
         if query.shape[0] < 1:
             return None
 
-        data_dict: Dict = query.iloc[0, :].to_dict()
+        data_dict: Dict = {k: str(v) for k, v in query.iloc[0, :].to_dict().items()}
         return Subject(self, data_dict)
 
     def get_subjects(self) -> List[int]:
@@ -163,9 +160,9 @@ class Dataset:
                 return True
         else:
             subject: Subject = cast(Subject, self.get_subject(subject_idx))
-            assert subject_name == subject["participant_name"], (
+            assert subject_name == subject["name"], (
                 f"The participant's name ({subject_name}) "
-                f"doesn't match the id ({subject['participant_name']})"
+                f"doesn't match the id ({subject['name']})"
             )
             return False
 
