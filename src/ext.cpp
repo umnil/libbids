@@ -46,7 +46,7 @@ PYBIND11_MODULE(clibbids, m) {
       .def(py::init<py::object, std::map<std::string, std::string>>())
       .def("__getitem__",
            [](Subject& self, std::string const& key) { return self[key]; })
-      .def("add_session", &Subject::add_session)
+      .def("add_session", &Subject::add_session, py::arg("silent") = false)
       .def_property_readonly("dataset", &Subject::dataset)
       .def("ensure_participant_id",
            static_cast<std::string (*)(std::string const&)>(
