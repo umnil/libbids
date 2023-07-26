@@ -56,7 +56,7 @@ class Run(Entity):
 
     def initialize_event_file(self) -> None:
         """Initializes the event file for writing"""
-        if self.event_file_path.exists():
+        if self.event_filepath.exists():
             raise Exception("Run data is already saved, please create a new run")
 
         self.eventbuf = open(self.event_filepath, "w")
