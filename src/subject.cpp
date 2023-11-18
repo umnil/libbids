@@ -99,7 +99,7 @@ int Subject::get_n_sessions() const {
 }
 
 Session Subject::get_session(int session_id) {
-  assert(session_id <= get_n_sessions());
+  assert(session_id <= this->get_n_sessions());
   return Session(*this, session_id);
 }
 
@@ -122,7 +122,7 @@ std::map<std::string, std::string> const& Subject::to_dict(void) const {
 //}
 
 bool Subject::confirm_add_session_() {
-  int n_sessions = get_n_sessions();
+  int n_sessions = this->get_n_sessions();
   if (n_sessions > 0) {
     std::string prompt = std::string("OK to start new session: ") +
                          std::to_string(n_sessions + 1) + "?";
