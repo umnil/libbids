@@ -51,6 +51,7 @@ class Run(Entity):
             current_event.duration = self.elapsed_time - current_event_onset
             self.current_event = current_event
             self.task.on_event_end(self.current_event)
+            self.append_event(self.current_event)
             self.previous_event = self.current_event
             self.current_event = None
 
