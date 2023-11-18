@@ -32,6 +32,7 @@ class EEGInstrument(Instrument):
         physical_dimension: str = "uV",
         physical_lim: Tuple = (-1000.0, 1000.0),
         preamp_filter: str = "",
+        record_duration: float = 1.0,
         init_read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
         read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
         **kwargs
@@ -55,6 +56,9 @@ class EEGInstrument(Instrument):
         preamp_filter : str
             Optionally supplied preamp filter settings for saving into the data
             of the edf file
+        record_duration: float
+            A length in time in secon of each data record chunk stored to the
+            edf file
         init_read_fn : Union[Tuple[str, List, Dict], Callable]
             If a tuple of a string and then a dictionary, the first string is
             the function name on `device` used for initializing reading, and the
@@ -75,6 +79,7 @@ class EEGInstrument(Instrument):
         self.physical_dimension: str = physical_dimension
         self.physical_lim: Tuple = physical_lim
         self.preamp_filter: str = preamp_filter
+        self.record_duration: float = record_duration
         self.init_read_fn: Union[Tuple[str, List, Dict], Callable] = init_read_fn
         self.read_fn: Union[Tuple[str, List, Dict], Callable] = read_fn
         self.modality_path.mkdir(exist_ok=True)
@@ -166,6 +171,7 @@ class EEGInstrument(Instrument):
             "equipment",
             "admincode",
             "gender",
+            "sex",
             "startdate",
             "birthdate",
         ]
@@ -187,6 +193,7 @@ class EEGInstrument(Instrument):
         n_electrodes: int = len(self.electrodes)
         self.writer: EdfWriter = EdfWriter(edf_fp, n_electrodes)
         self.writer.setHeader(self.metadata)
+        self.writer.setDatarecordDuration(self.record_duration)
         for i, el in enumerate(self.electrodes):
             self.writer.setLabel(i, el)
             self.writer.setPhysicalDimension(i, self.physical_dimension)
