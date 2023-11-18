@@ -21,9 +21,15 @@ def qprompt(msg: str, yes_button_text: str = "Yes", no_button_text: str = "No"):
     bool
         Whether the yes button was clicked
     """
+    # Adjust messagebox class for PyQt6
+    if not hasattr(QMessageBox, "YesRole"):
+        for role in QMessageBox.ButtonRole:
+            setattr(QMessageBox, role.name, role)
+            setattr(QMessageBox, "exec_", QMessageBox.exec)
+
     msgbox: QMessageBox = QMessageBox()
     msgbox.setText(msg)
     yes_button: QPushButton = msgbox.addButton(yes_button_text, QMessageBox.YesRole)
     msgbox.addButton(no_button_text, QMessageBox.NoRole)
-    msgbox.exec_()
+    QMessageBox.exec_(msgbox)
     return msgbox.clickedButton() == yes_button
