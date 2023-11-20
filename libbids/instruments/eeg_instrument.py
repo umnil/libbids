@@ -13,14 +13,14 @@ from typing import (
     cast,
 )
 
-from .instrument import Instrument
+from .read_instrument import ReadInstrument
 from ..enums import Modality
 
 if TYPE_CHECKING:
-    from ..session import Session
+    from ..session import Session  # type: ignore
 
 
-class EEGInstrument(Instrument):
+class EEGInstrument(ReadInstrument):
     """An instrumentation device capable of recording electroecephalograms"""
 
     def __init__(
@@ -104,6 +104,10 @@ class EEGInstrument(Instrument):
 
         fn, args, kwargs = cast(Tuple, self.read_fn)
         return self.device.__getattribute__(fn)(*args, **kwargs)
+
+    def flush(self) -> None:
+        """Read data from the device simply to discard"""
+        self.device_read()
 
     def read(self, remainder: bool = False) -> np.ndarray:
         """Read data from the headset and return the data

@@ -1,13 +1,13 @@
 from typing import Any, TYPE_CHECKING
 
-from .instrument import Instrument
+from .write_instrument import WriteInstrument
 from ..enums import Modality
 
 if TYPE_CHECKING:
-    from ..session import Session
+    from ..session import Session  # type: ignore
 
 
-class StimInstrument(Instrument):
+class StimInstrument(WriteInstrument):
     """Ann instrument device capable of sending a stimulus"""
 
     def __init__(
@@ -38,6 +38,6 @@ class StimInstrument(Instrument):
     def stop(self):
         self.device.stop()
 
-    def write(self, command: str):
+    def write(self, command: str) -> None:
         """a string command to send to the device"""
         self.device.write(command)
