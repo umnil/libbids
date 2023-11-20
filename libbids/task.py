@@ -4,7 +4,7 @@ from abc import abstractmethod
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, TYPE_CHECKING
-from .clibbids import Entity
+from .clibbids import Entity  # type: ignore
 from .event import Event
 from .instruments import Instrument
 from .notes import Notes
