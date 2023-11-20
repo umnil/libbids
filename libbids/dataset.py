@@ -2,13 +2,12 @@
 Supplemental pybids object for manipulating the dataset
 """
 import os
-import sys
 import json
 import pandas as pd  # type: ignore
 from bids.layout import BIDSLayout  # type: ignore
 from pathlib import Path
 from typing import Dict, List, Optional, cast
-from .clibbids import Subject
+from .clibbids import Subject  # type: ignore
 
 try:
     from PyQt6.QtWidgets import QMessageBox, QWidget  # type: ignore
@@ -105,11 +104,10 @@ class Dataset:
         -------
         List[int]
         """
-        participant_ids: List[str] = self.participant_table["participant_id"].values.tolist()
-        return [
-            int(ids[4:])
-            for ids in participant_ids
-        ]
+        participant_ids: List[str] = self.participant_table[
+            "participant_id"
+        ].values.tolist()
+        return [int(ids[4:]) for ids in participant_ids]
 
     def is_subject(self, idx: int) -> bool:
         """determins if the subject with the provided id exists
