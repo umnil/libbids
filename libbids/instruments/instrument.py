@@ -6,7 +6,7 @@ from typing import Optional, TYPE_CHECKING, Union, cast
 from ..enums import Modality
 
 if TYPE_CHECKING:
-    from ..session import Session
+    from ..session import Session  # type: ignore
 
 
 class Instrument(ABC):

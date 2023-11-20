@@ -4,8 +4,9 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, List, Optional, TYPE_CHECKING, cast
 
-from .clibbids import Entity
+from .clibbids import Entity  # type: ignore
 from .event import Event
+from .instruments import ReadInstrument
 
 if TYPE_CHECKING:
     from .task import Task
@@ -54,6 +55,12 @@ class Run(Entity):
             self.append_event(self.current_event)
             self.previous_event = self.current_event
             self.current_event = None
+
+    def flush_instruments(self) -> None:
+        """Flushes Read instruments"""
+        for ins in self.task.instruments:
+            if isinstance(ins, ReadInstrument):
+                ins.flush()
 
     def initialize_event_file(self) -> None:
         """Initializes the event file for writing"""
@@ -106,7 +113,7 @@ class Run(Entity):
             self.task.on_event_start(self.current_event)
 
         # Throw away any samples collected during setup
-        self.task.process()
+        self.flush_instruments()
         while not self.done:
             # Handle events
             if self.is_current_event_finished():

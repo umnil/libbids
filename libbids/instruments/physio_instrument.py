@@ -5,7 +5,7 @@ from .instrument import Instrument
 from ..enums import Modality
 
 if TYPE_CHECKING:
-    from ..session import Session
+    from ..session import Session  # type: ignore
 
 
 class PhysioInstrument(Instrument):
@@ -144,4 +144,3 @@ class PhysioInstrument(Instrument):
                     value = datetime.now()
             result.update({required_key: value})
         return result
-
