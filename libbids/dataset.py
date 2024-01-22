@@ -71,7 +71,7 @@ class Dataset:
         fn: str = "participants.tsv"
         fp: str = os.path.join(self.layout.root, fn)
         subject_data: dict = subject.to_dict()
-        subject_table: pd.DataFrame = pd.DataFrame(pd.Series(subject_data))
+        subject_table: pd.DataFrame = pd.DataFrame(pd.Series(subject_data)).T
         participant_data: pd.DataFrame = pd.concat(
             [self.participant_table, subject_table], ignore_index=True
         )
