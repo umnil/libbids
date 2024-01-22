@@ -13,6 +13,7 @@ def test_constructor_with_name_and_optional_key_and_int_value():
 
     assert entity.id == "KEY-42"
 
+
 def test_constructor_with_name_and_optional_key_and_string_value():
     name = "Entity"
     key: Optional[str] = "KEY"
@@ -22,6 +23,7 @@ def test_constructor_with_name_and_optional_key_and_string_value():
     entity = Entity(name, key, value, padding)
 
     assert entity.id == "KEY-VALUE"
+
 
 def test_constructor_with_name_and_optional_key_and_invalid_string_value():
     name: str = "Entity"
