@@ -4,13 +4,13 @@ import tempfile
 
 from pathlib import Path
 from libbids import Dataset
-from libbids.clibbids import Session, Subject
+from libbids.clibbids import Session
+
 
 # Test fixture for Session class
-class TestSession: 
-    @pytest.fixture(autouse=True)
-
+class TestSession:
     # Set up the test fixture
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.test_dir = Path(tempfile.mkdtemp())
         self.participants_file = self.test_dir / "participants.tsv"
@@ -29,7 +29,7 @@ class TestSession:
             file.write("{\n")
             file.write('\t"name": {\n')
             file.write('\t\t"Description": "Name of participant"\n')
-            file.write('\t}\n')
+            file.write("\t}\n")
             file.write("}\n")
 
         self.dataset = Dataset(self.test_dir, True)

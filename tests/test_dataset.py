@@ -1,9 +1,9 @@
 import pytest
 import tempfile
 import shutil
-import os
 from pathlib import Path
-from libbids import Dataset, Subject
+from libbids import Dataset
+
 
 class TestDataset:
     @pytest.fixture(autouse=True)
@@ -25,7 +25,7 @@ class TestDataset:
             file.write("{\n")
             file.write('\t"name": {\n')
             file.write('\t\t"Description": "Name of participant"\n')
-            file.write('\t}\n')
+            file.write("\t}\n")
             file.write("}\n")
 
         self.dataset = Dataset(self.test_dir, True)
@@ -48,7 +48,7 @@ class TestDataset:
         args = {"participant_id": "sub-03", "name": "Bob", "age": "25"}
 
         with pytest.raises(AssertionError):
-            subject = self.dataset.add_subject(**args)
+            self.dataset.add_subject(**args)
 
     def test_get_subject_existing_subject_returns_subject(self):
         subject = self.dataset.get_subject(1)
@@ -78,4 +78,3 @@ class TestDataset:
         assert len(subject_ids) == 2
         assert subject_ids[0] == 1
         assert subject_ids[1] == 2
-

@@ -6,11 +6,11 @@ from pathlib import Path
 from libbids import Dataset
 from libbids.clibbids import Session, Subject
 
+
 # Test fixture for Subject class
 class TestSubject:
-    @pytest.fixture(autouse=True)
-
     # Set up the test fixture
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.test_dir = Path(tempfile.mkdtemp())
         self.participants_file = self.test_dir / "participants.tsv"
@@ -29,7 +29,7 @@ class TestSubject:
             file.write("{\n")
             file.write('\t"name": {\n')
             file.write('\t\t"Description": "Name of participant"\n')
-            file.write('\t}\n')
+            file.write("\t}\n")
             file.write("}\n")
 
         self.dataset = Dataset(self.test_dir, True)
@@ -42,7 +42,9 @@ class TestSubject:
     # Test the path() method of Subject
     def test_path_test(self):
         # Create a Subject object with index 1
-        subject: Subject = Subject(self.dataset, dict(name="Jacob", participant_id="sub-01"))
+        subject: Subject = Subject(
+            self.dataset, dict(name="Jacob", participant_id="sub-01")
+        )
 
         # Expected path: subject path + session id
         expected_path: Path = self.dataset.bids_dir / "sub-01"
@@ -53,7 +55,7 @@ class TestSubject:
     # Test the prefix() method of Subject
     def test_prefix(self):
         # Create a Subject object with index 2
-        subject: n = Subject(self.dataset, dict(participant_id="02"))
+        subject: Subject = Subject(self.dataset, dict(participant_id="02"))
 
         # Expected prefix: subject id + "_" + session id
         expected_prefix: str = "sub-02"
@@ -72,7 +74,9 @@ class TestSubject:
     # Test adding a session
     def test_add_session(self):
         # Create a Subject object with index 4
-        subject: Subject = Subject(self.dataset, dict(participant_id="sub-04", name="J'Dinklage Morgoon"))
+        subject: Subject = Subject(
+            self.dataset, dict(participant_id="sub-04", name="J'Dinklage Morgoon")
+        )
 
         # Create a session on the subject
         session: Session = subject.add_session(silent=True)
