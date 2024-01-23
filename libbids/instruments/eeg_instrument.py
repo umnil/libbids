@@ -145,7 +145,7 @@ class EEGInstrument(ReadInstrument):
         if len(self.sfreqs) == 1:
             sfreq: int = self.sfreqs[0]
             period: int = int(sfreq * self.record_duration)
-            samples: np.ndarray = self.device_read()
+            samples: np.ndarray = cast(np.ndarray, self.device_read())
             self.buffer = np.c_[self.buffer, samples]
             if (not remainder) and (self.buffer.shape[1] >= period):
                 writebuf: np.ndarray = self.buffer[:, :period]
@@ -160,20 +160,15 @@ class EEGInstrument(ReadInstrument):
                 )
         else:
             periods: List = [int(f) * self.record_duration for f in self.sfreqs]
-            ch_samples: List = self.device_read()
+            ch_samples: List = cast(List, self.device_read())
             assert len(ch_samples) == len(
                 self.sfreqs
             ), "Data must be the same length as the number sfreqs"
-            self.buffers = [
-                np.c_[i, j]
-                for i, j in zip(
-                    self.buffers,
-                )
-            ]
-            period_met: bool = np.all(
+            self.buffers = [np.c_[i, j] for i, j in zip(self.buffers, ch_samples)]
+            period_met: np.bool_ = np.all(
                 [i.shape[0] >= j for i, j in zip(self.buffers, periods)]
             )
-            has_data: bool = np.any([i.shape[0] > 0 for i in self.buffers])
+            has_data: np.bool_ = np.any([i.shape[0] > 0 for i in self.buffers])
             if (not remainder) and period_met:
                 writebufs: List = [i[:j] for i, j in zip(self.buffers, periods)]
                 self.buffers = [i[j:] for i, j in zip(self.buffers, periods)]
