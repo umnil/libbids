@@ -27,7 +27,7 @@ class EEGInstrument(ReadInstrument):
         self,
         session: "Session",
         device: Any,
-        sfreq: int,
+        sfreq: Union[int, List[int]],
         electrodes: List[str],
         physical_dimension: str = "uV",
         physical_lim: Tuple = (-1000.0, 1000.0),
@@ -35,6 +35,7 @@ class EEGInstrument(ReadInstrument):
         record_duration: float = 1.0,
         init_read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
         read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
+        is_digital: bool = False,
         **kwargs
     ):
         """Initialize a device for collecting electroecephalograms
@@ -45,8 +46,10 @@ class EEGInstrument(ReadInstrument):
             Session currently using this instrument
         device : Any
             The a class that respresents a device for eeg data collection
-        sfreq : int
-            The device's sampling frequency
+        sfreq : Union[int, List[int]]
+            The device's sampling frequency. All channels/electrodes assume the
+            same sampling rate if a signle integer is provided, else a list of
+            sampling rates must be provided for each channel/electrode
         electrodes: List[str]
             A list of electrode names associated with the device
         physical_dimension : str
@@ -66,14 +69,20 @@ class EEGInstrument(ReadInstrument):
             callable, the function is simply called
         read_fn : Union[Tuple[str, Dict], Callable]
             Similar to `init_read_fn`, but used for sampling data from the device
+        is_digital : bool
+            Whether the data recorded from the device is in a digital format or
+            a physical floating point integer (e.g., µV)
         kwargs : Dict
             This keyword arguments dictionary is used to supply detailes to the
             edf file header. <See
             https://pyedflib.readthedocs.io/en/latest/_modules/pyedflib/edfwriter.html#EdfWriter.setHeader>
         """
         super(EEGInstrument, self).__init__(session, Modality.EEG, file_ext="edf")
-        self.sfreq: int = sfreq
+        self.sfreqs: List[int] = sfreq if isinstance(sfreq, List) else [sfreq]
         assert len(electrodes) > 1, "Must supply electrodes"
+        assert len(self.sfreqs) == 1 or len(self.sfreqs) == len(
+            electrodes
+        ), "Must supply same number of sampling rates as electrodes"
         self.device: Any = device
         self.electrodes: List[str] = electrodes
         self.physical_dimension: str = physical_dimension
@@ -82,9 +91,11 @@ class EEGInstrument(ReadInstrument):
         self.record_duration: float = record_duration
         self.init_read_fn: Union[Tuple[str, List, Dict], Callable] = init_read_fn
         self.read_fn: Union[Tuple[str, List, Dict], Callable] = read_fn
+        self.is_digital: bool = is_digital
         self.modality_path.mkdir(exist_ok=True)
         self.metadata: Dict = self._fixup_edf_metadata(kwargs)
         self.buffer: np.ndarray
+        self.buffers: List[np.ndarray] = [np.array([]) for i in range(len(self.sfreqs))]
 
     def annotate(self, onset: float, duration: float, description: str):
         assert self.writer.writeAnnotation(onset, duration, description) == 0
@@ -97,8 +108,16 @@ class EEGInstrument(ReadInstrument):
         fn, args, kwargs = cast(Tuple, self.init_read_fn)
         self.device.__getattribute__(fn)(*args, **kwargs)
 
-    def device_read(self) -> np.ndarray:
-        """read data from the device"""
+    def device_read(self) -> Union[np.ndarray, List]:
+        """read data from the device
+
+        Returns
+        -------
+        np.ndarray
+            If all channels share the same sampling rate
+        List
+            If not all channels share the same sampling rate
+        """
         if isinstance(self.read_fn, Callable):  # type: ignore
             return cast(Callable, self.read_fn)()
 
@@ -123,16 +142,45 @@ class EEGInstrument(ReadInstrument):
         np.ndarray
             A 2D array of data in the shape of (channels, time)
         """
-        # samples
-        samples: np.ndarray = self.device_read()
-        self.buffer = np.c_[self.buffer, samples]
-        if (not remainder) and (self.buffer.shape[1] >= 256):
-            writebuf: np.ndarray = self.buffer[:, :256]
-            self.buffer = self.buffer[:, 256:]
-            self.writer.writeSamples(np.ascontiguousarray(writebuf))
-        elif remainder and (self.buffer.shape[1] > 0):
-            writebuf = self.buffer[:, :256]
-            self.writer.writeSamples(np.ascontiguousarray(writebuf))
+        if len(self.sfreqs) == 1:
+            sfreq: int = self.sfreqs[0]
+            period: int = int(sfreq * self.record_duration)
+            samples: np.ndarray = self.device_read()
+            self.buffer = np.c_[self.buffer, samples]
+            if (not remainder) and (self.buffer.shape[1] >= period):
+                writebuf: np.ndarray = self.buffer[:, :period]
+                self.buffer = self.buffer[:, period:]
+                self.writer.writeSamples(
+                    np.ascontiguousarray(writebuf), digital=self.is_digital
+                )
+            elif remainder and (self.buffer.shape[1] > 0):
+                writebuf = self.buffer[:, :period]
+                self.writer.writeSamples(
+                    np.ascontiguousarray(writebuf), digital=self.is_digital
+                )
+        else:
+            periods: List = [int(f) * self.record_duration for f in self.sfreqs]
+            ch_samples: List = self.device_read()
+            assert len(ch_samples) == len(
+                self.sfreqs
+            ), "Data must be the same length as the number sfreqs"
+            self.buffers = [
+                np.c_[i, j]
+                for i, j in zip(
+                    self.buffers,
+                )
+            ]
+            period_met: bool = np.all(
+                [i.shape[0] >= j for i, j in zip(self.buffers, periods)]
+            )
+            has_data: bool = np.any([i.shape[0] > 0 for i in self.buffers])
+            if (not remainder) and period_met:
+                writebufs: List = [i[:j] for i, j in zip(self.buffers, periods)]
+                self.buffers = [i[j:] for i, j in zip(self.buffers, periods)]
+                self.writer.writeSamples(writebufs, digital=self.is_digital)
+            elif remainder and has_data:
+                writebufs = [i[:j] for i, j in zip(self.buffers, periods)]
+                self.writer.writeSamples(writebufs, digital=self.is_digital)
 
         return samples
 
@@ -203,6 +251,8 @@ class EEGInstrument(ReadInstrument):
             self.writer.setPhysicalDimension(i, self.physical_dimension)
             self.writer.setPhysicalMaximum(i, self.physical_lim[0])
             self.writer.setPhysicalMinimum(i, self.physical_lim[1])
-            self.writer.setSamplefrequency(i, self.sfreq)
+            self.writer.setSamplefrequency(
+                i, self.sfreqs[0] if len(self.sfreqs) == 1 else self.sfreqs[i]
+            )
             if "AUX" not in el:
                 self.writer.setPrefilter(i, self.preamp_filter)
