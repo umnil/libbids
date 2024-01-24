@@ -1,7 +1,7 @@
 """Instrument for stimulating or recording"""
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union, cast
+from typing import List, Optional, TYPE_CHECKING, Union, cast
 
 from ..enums import Modality
 
@@ -60,7 +60,7 @@ class Instrument(ABC):
         self.task_id: str = ""
         self.run_id: str = ""
         self._started: bool = False
-        self.sfreq: int
+        self.sfreqs: List[int]
 
     @abstractmethod
     def start(self, task_id: str, run_id: str):

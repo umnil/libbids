@@ -171,7 +171,7 @@ class Run(Entity):
 
     @property
     def sfreq(self) -> int:
-        return self.task.primary_instrument.sfreq
+        return self.task.primary_instrument.sfreqs[0]
 
     @property
     def subject_dir(self) -> Path:
