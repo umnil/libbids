@@ -1,5 +1,6 @@
 import numpy as np
 from abc import abstractmethod
+from typing import List, Union
 
 from .instrument import Instrument
 
@@ -14,7 +15,7 @@ class ReadInstrument(Instrument):
         raise Exception("Method not implemented")
 
     @abstractmethod
-    def read(self, remainder: bool = False) -> np.ndarray:
+    def read(self, remainder: bool = False) -> Union[List, np.ndarray]:
         """Read data from the headset and return the data
 
         Parameters
