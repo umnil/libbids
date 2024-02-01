@@ -35,6 +35,7 @@ class EEGInstrument(ReadInstrument):
         record_duration: float = 1.0,
         init_read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
         read_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
+        stop_fn: Union[Tuple[str, list, Dict], Callable] = lambda: None,
         is_digital: bool = False,
         **kwargs
     ):
@@ -69,6 +70,8 @@ class EEGInstrument(ReadInstrument):
             callable, the function is simply called
         read_fn : Union[Tuple[str, Dict], Callable]
             Similar to `init_read_fn`, but used for sampling data from the device
+        stop_fn: Union[Tuple[str, List, Dict], Callable]
+            The function used to stop the actual hardware
         is_digital : bool
             Whether the data recorded from the device is in a digital format or
             a physical floating point integer (e.g., µV)
@@ -91,6 +94,7 @@ class EEGInstrument(ReadInstrument):
         self.record_duration: float = record_duration
         self.init_read_fn: Union[Tuple[str, List, Dict], Callable] = init_read_fn
         self.read_fn: Union[Tuple[str, List, Dict], Callable] = read_fn
+        self.stop_fn: Union[Tuple[str, List, Dict], Callable] = stop_fn
         self.is_digital: bool = is_digital
         self.modality_path.mkdir(exist_ok=True)
         self.metadata: Dict = self._fixup_edf_metadata(kwargs)
@@ -122,6 +126,14 @@ class EEGInstrument(ReadInstrument):
             return cast(Callable, self.read_fn)()
 
         fn, args, kwargs = cast(Tuple, self.read_fn)
+        return self.device.__getattribute__(fn)(*args, **kwargs)
+
+    def device_stop(self) -> None:
+        """Stop the device"""
+        if isinstance(self.stop_fn, Callable):  # type: ignore
+            return case(Callable, self.stop_fn)()
+
+        fn, args, kwards = cast(Tuple, self.stop_fn)
         return self.device.__getattribute__(fn)(*args, **kwargs)
 
     def flush(self) -> None:
