@@ -105,9 +105,9 @@ class IEEGInstrument(ReadInstrument):
         """Initializes reading on the device"""
         if isinstance(self.init_read_fn, Callable):
             self.init_read_fn()
-
-        fn, args, kwargs = cast(Tuple, self.init_read_fn)
-        self.device.__getattribute__(fn)(*args, **kwargs)
+        else:
+            fn, args, kwargs = cast(Tuple, self.init_read_fn)
+            self.device.__getattribute__(fn)(*args, **kwargs)
 
     def device_read(self) -> Union[np.ndarray, List]:
         """read data from the device
@@ -129,7 +129,7 @@ class IEEGInstrument(ReadInstrument):
         """Read data from the device simply to discard"""
         self.device_read()
 
-    def read(self, remainder: bool = False) -> np.ndarray:
+    def read(self, remainder: bool = False) -> Union[List, np.ndarray]:
         """Read data from the headset and return the data
 
         Parameters
@@ -159,13 +159,14 @@ class IEEGInstrument(ReadInstrument):
                 self.writer.writeSamples(
                     np.ascontiguousarray(writebuf), digital=self.is_digital
                 )
+            return samples
         else:
-            periods: List = [int(f) * self.record_duration for f in self.sfreqs]
+            periods: List[int] = [int(f * self.record_duration) for f in self.sfreqs]
             ch_samples: List = cast(List, self.device_read())
             assert len(ch_samples) == len(
                 self.sfreqs
             ), "Data must be the same length as the number sfreqs"
-            self.buffers = [np.c_[i, j] for i, j in zip(self.buffers, ch_samples)]
+            self.buffers = [np.r_[i, j] for i, j in zip(self.buffers, ch_samples)]
             period_met: np.bool_ = np.all(
                 [i.shape[0] >= j for i, j in zip(self.buffers, periods)]
             )
@@ -177,8 +178,7 @@ class IEEGInstrument(ReadInstrument):
             elif remainder and has_data:
                 writebufs = [i[:j] for i, j in zip(self.buffers, periods)]
                 self.writer.writeSamples(writebufs, digital=self.is_digital)
-
-        return samples
+            return ch_samples
 
     def start(self, task: str, run_id: str):
         """Begin recording a run
