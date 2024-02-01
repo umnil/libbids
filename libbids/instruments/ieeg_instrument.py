@@ -149,13 +149,15 @@ class IEEGInstrument(ReadInstrument):
             samples: np.ndarray = cast(np.ndarray, self.device_read())
             self.buffer = np.c_[self.buffer, samples]
             if (not remainder) and (self.buffer.shape[1] >= period):
-                writebuf: np.ndarray = self.buffer[:, :period]
-                self.buffer = self.buffer[:, period:]
+                n_periods: int = self.buffer.shape[1] // period
+                period_boundary: int = n_periods * period
+                writebuf: np.ndarray = self.buffer[:, :period_boundary]
+                self.buffer = self.buffer[:, period_boundary:]
                 self.writer.writeSamples(
                     np.ascontiguousarray(writebuf), digital=self.is_digital
                 )
             elif remainder and (self.buffer.shape[1] > 0):
-                writebuf = self.buffer[:, :period]
+                writebuf = self.buffer
                 self.writer.writeSamples(
                     np.ascontiguousarray(writebuf), digital=self.is_digital
                 )
@@ -172,11 +174,17 @@ class IEEGInstrument(ReadInstrument):
             )
             has_data: np.bool_ = np.any([i.shape[0] > 0 for i in self.buffers])
             if (not remainder) and period_met:
-                writebufs: List = [i[:j] for i, j in zip(self.buffers, periods)]
-                self.buffers = [i[j:] for i, j in zip(self.buffers, periods)]
+                n_periods: List = [
+                    i.shape[0] // j for i, j in zip(self.buffers, periods)
+                ]
+                period_boundaries: List = [i * j for i, j in zip(n_periods, periods)]
+                writebufs: List = [
+                    i[:j] for i, j in zip(self.buffers, period_boundaries)
+                ]
+                self.buffers = [i[j:] for i, j in zip(self.buffers, period_boundaries)]
                 self.writer.writeSamples(writebufs, digital=self.is_digital)
             elif remainder and has_data:
-                writebufs = [i[:j] for i, j in zip(self.buffers, periods)]
+                writebufs = self.buffers
                 self.writer.writeSamples(writebufs, digital=self.is_digital)
             return ch_samples
 
