@@ -219,6 +219,7 @@ class EEGInstrument(ReadInstrument):
     def stop(self):
         """Stop the run"""
         super().stop()
+        self.device_stop()
         self.writer.close()
 
     def _fixup_edf_metadata(self, metadata: Dict):
