@@ -73,7 +73,9 @@ class Task(Entity):
         Run
             A run object that can be used to start the session
         """
-        return Run(self)
+        run: Run = Run(self)
+        self.on_new_run(run)
+        return run
 
     @abstractmethod
     def on_event_start(self, event: Event):
@@ -93,6 +95,17 @@ class Task(Entity):
         ----------
         event : Event
             The event that just finished
+        """
+        raise Exception("Not Implemented")
+
+    @abstractmethod
+    def on_new_run(self, run: Run) -> None:
+        """Called when a new run is created
+
+        Parameters
+        ----------
+        run : Run
+            The instance of the Run that will process the task
         """
         raise Exception("Not Implemented")
 
