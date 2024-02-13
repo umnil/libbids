@@ -4,7 +4,8 @@ import tempfile
 
 from pathlib import Path
 from libbids import Dataset
-from libbids.clibbids import Session
+from libbids.clibbids import Session, Subject  # type: ignore
+from typing import cast
 
 
 # Test fixture for Session class
@@ -41,29 +42,29 @@ class TestSession:
         shutil.rmtree(self.test_dir)
 
     # Test the path() method of Session
-    def test_path_test(self):
+    def test_path_test(self) -> None:
         # Create a Session object with index 1
         session: Session = Session(self.subject, 1)
 
         # Expected path: subject path + session id
-        expected_path: Path = self.subject.path / "ses-01"
+        expected_path: Path = cast(Subject, self.subject).path / "ses-01"
 
         # Check if the calculated path matches the expected path
         assert session.path == expected_path
 
     # Test the prefix() method of Session
-    def test_prefix(self):
+    def test_prefix(self) -> None:
         # Create a Session object with index 2
         session: Session = Session(self.subject, 2)
 
         # Expected prefix: subject id + "_" + session id
-        expected_prefix: str = self.subject.id + "_" + session.id
+        expected_prefix: str = cast(Subject, self.subject).id + "_" + session.id
 
         # Check if the calculated prefix matches the expected prefix
         assert session.prefix == expected_prefix
 
     # test the label
-    def test_label(self):
+    def test_label(self) -> None:
         # Create a Session object with index 3
         session: Session = Session(self.subject, 3)
 
@@ -71,7 +72,7 @@ class TestSession:
         assert session.label == "03"
 
     # test padding
-    def test_padding(self):
+    def test_padding(self) -> None:
         # Create a Session object with index 4
         session: Session = Session(self.subject, 4)
 
@@ -79,7 +80,7 @@ class TestSession:
         assert session.padding == 2
 
     # test index
-    def test_index(self):
+    def test_index(self) -> None:
         # Creat a Session object with index 5
         session: Session = Session(self.subject, 5)
 

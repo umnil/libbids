@@ -1,9 +1,9 @@
 from typing import Optional
 
-from libbids.clibbids import Entity
+from libbids.clibbids import Entity  # type: ignore
 
 
-def test_constructor_with_name_and_optional_key_and_int_value():
+def test_constructor_with_name_and_optional_key_and_int_value() -> None:
     name = "Entity"
     key: Optional[str] = "KEY"
     value: int = 42
@@ -14,7 +14,7 @@ def test_constructor_with_name_and_optional_key_and_int_value():
     assert entity.id == "KEY-42"
 
 
-def test_constructor_with_name_and_optional_key_and_string_value():
+def test_constructor_with_name_and_optional_key_and_string_value() -> None:
     name = "Entity"
     key: Optional[str] = "KEY"
     value: str = "VALUE"
@@ -25,7 +25,7 @@ def test_constructor_with_name_and_optional_key_and_string_value():
     assert entity.id == "KEY-VALUE"
 
 
-def test_constructor_with_name_and_optional_key_and_invalid_string_value():
+def test_constructor_with_name_and_optional_key_and_invalid_string_value() -> None:
     name: str = "Entity"
     key: Optional[str] = "KEY"
     value: str = "INVALID"
