@@ -131,9 +131,9 @@ class EEGInstrument(ReadInstrument):
     def device_stop(self) -> None:
         """Stop the device"""
         if isinstance(self.stop_fn, Callable):  # type: ignore
-            return case(Callable, self.stop_fn)()
+            return cast(Callable, self.stop_fn)()
 
-        fn, args, kwards = cast(Tuple, self.stop_fn)
+        fn, args, kwargs = cast(Tuple, self.stop_fn)
         return self.device.__getattribute__(fn)(*args, **kwargs)
 
     def flush(self) -> None:
@@ -185,10 +185,10 @@ class EEGInstrument(ReadInstrument):
             )
             has_data: np.bool_ = np.any([i.shape[0] > 0 for i in self.buffers])
             if (not remainder) and period_met:
-                n_periods: List = [
+                n_periodss: List[int] = [
                     i.shape[0] // j for i, j in zip(self.buffers, periods)
                 ]
-                period_boundaries: List = [i * j for i, j in zip(n_periods, periods)]
+                period_boundaries: List = [i * j for i, j in zip(n_periodss, periods)]
                 writebufs: List = [
                     i[:j] for i, j in zip(self.buffers, period_boundaries)
                 ]

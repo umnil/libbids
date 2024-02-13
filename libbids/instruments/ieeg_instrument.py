@@ -1,7 +1,3 @@
-import numpy as np  # type: ignore
-
-from datetime import datetime
-from pyedflib import EdfWriter  # type: ignore
 from typing import (
     Any,
     Callable,
@@ -10,7 +6,6 @@ from typing import (
     Tuple,
     TYPE_CHECKING,
     Union,
-    cast,
 )
 
 from .eeg_instrument import EEGInstrument

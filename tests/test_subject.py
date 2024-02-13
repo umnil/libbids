@@ -4,7 +4,7 @@ import tempfile
 
 from pathlib import Path
 from libbids import Dataset
-from libbids.clibbids import Session, Subject
+from libbids.clibbids import Session, Subject  # type: ignore
 
 
 # Test fixture for Subject class
@@ -40,7 +40,7 @@ class TestSubject:
         shutil.rmtree(self.test_dir)
 
     # Test the path() method of Subject
-    def test_path_test(self):
+    def test_path_test(self) -> None:
         # Create a Subject object with index 1
         subject: Subject = Subject(
             self.dataset, dict(name="Jacob", participant_id="sub-01")
@@ -53,7 +53,7 @@ class TestSubject:
         assert subject.path == expected_path
 
     # Test the prefix() method of Subject
-    def test_prefix(self):
+    def test_prefix(self) -> None:
         # Create a Subject object with index 2
         subject: Subject = Subject(self.dataset, dict(participant_id="02"))
 
@@ -64,7 +64,7 @@ class TestSubject:
         assert subject.id == expected_prefix
 
     # test the label
-    def test_label(self):
+    def test_label(self) -> None:
         # Create a Subject object with index 3
         subject: Subject = Subject(self.dataset, dict(participant_id="sub-03"))
 
@@ -72,7 +72,7 @@ class TestSubject:
         assert subject.get_participant_label() == "03"
 
     # Test adding a session
-    def test_add_session(self):
+    def test_add_session(self) -> None:
         # Create a Subject object with index 4
         subject: Subject = Subject(
             self.dataset, dict(participant_id="sub-04", name="J'Dinklage Morgoon")
