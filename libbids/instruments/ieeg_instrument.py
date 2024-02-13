@@ -6,8 +6,6 @@ from typing import (
     Tuple,
     TYPE_CHECKING,
     Union,
-)
-
 from .eeg_instrument import EEGInstrument
 from ..enums import Modality
 

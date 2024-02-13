@@ -7,6 +7,7 @@ from libbids import Dataset
 from libbids.clibbids import Session, Subject  # type: ignore
 
 
+
 # Test fixture for Subject class
 class TestSubject:
     # Set up the test fixture
