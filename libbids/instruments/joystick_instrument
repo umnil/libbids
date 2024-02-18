@@ -3,7 +3,7 @@ import csv
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Union
-
+from controllerinput import joystick_controller
 from .enums import Modality
 from .read_instrument import ReadInstrument
 
