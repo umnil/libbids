@@ -47,5 +47,8 @@ class JoystickInstrument(ReadInstrument):
             # Write a row for each instance of joystick data
             for instance in data:
                 writer.writerow({'Timestamp': timestamp, 'Joystick Output': json.dumps(instance)})
+        def flush(self) -> None:
+            """Read data from the device simply to discard"""
+        self.device_read()
 
         return None 
