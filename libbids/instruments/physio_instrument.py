@@ -7,13 +7,14 @@ from ..enums import Modality
 if TYPE_CHECKING:
     from ..session import Session  # type: ignore
 
-
+#make label be defined after session variable
 class PhysioInstrument(Instrument):
     """An instrument device capable of sampling data from a device"""
 
     def __init__(
         self,
         session: "Session",
+        label: str,
         device: Any,
         sfreq: int,
         electrodes: List[str],
@@ -43,7 +44,8 @@ class PhysioInstrument(Instrument):
         preamp_filter : str
             Optionally supplied preamp filter settings for saving into the data
             of the edf file
-        init_read_fn : Union[Tuple[str, List, Dict], Callable]
+        init_read_fn :ead functions / joystcik device pysio instrument 
+eeg_instrument = EEGIns Union[Tuple[str, List, Dict], Callable]
             If a tuple of a string and then a dictionary, the first string is
             the function name on `device` used for initializing reading, and the
             list is args and the Dict is the kwargs. If this argument is
@@ -58,7 +60,7 @@ class PhysioInstrument(Instrument):
         super(PhysioInstrument, self).__init__(
             session,
             Modality.PHYSIO,
-            label="emg",
+            label=label,
             primary_modality=Modality.EEG,
             file_ext="edf",
         )
@@ -113,6 +115,66 @@ class PhysioInstrument(Instrument):
         event_data: str
         """
         self.device.write(event_data)
+    def read(self, remainder: bool = False) -> Union[List, np.ndarray]:
+        """Read data from the headset and return the data
+
+        Parameters
+        ----------
+        remainder : bool
+            Because EDFWriter only allows full seconds to be written, the last
+            time this function should be called is with remainder set to true
+
+        Returns
+        -------
+        np.ndarray
+            A 2D array of data in the shape of (channels, time)
+        """
+        if len(self.sfreqs) == 1:
+            sfreq: int = self.sfreqs[0]
+            period: int = int(sfreq * self.record_duration)
+            samples: np.ndarray = cast(np.ndarray, self.device_read())
+            self.buffer = np.c_[self.buffer, samples]
+            if (not remainder) and (self.buffer.shape[1] >= period):
+                n_periods: int = self.buffer.shape[1] // period
+                period_boundary: int = n_periods * period
+                writebuf: np.ndarray = self.buffer[:, :period_boundary]
+                self.buffer = self.buffer[:, period_boundary:]
+                self.writer.writeSamples(
+                    np.ascontiguousarray(writebuf), digital=self.is_digital
+                )
+            elif remainder and (self.buffer.shape[1] > 0):
+                writebuf = self.buffer
+                self.writer.writeSamples(
+                    np.ascontiguousarray(writebuf), digital=self.is_digital
+                )
+            return samples
+        else:
+            periods: List[int] = [int(f * self.record_duration) for f in self.sfreqs]
+            ch_samples: List = cast(List, self.device_read())
+            assert len(ch_samples) == len(
+                self.sfreqs
+            ), "Data must be the same length as the number sfreqs"
+            self.buffers = [np.r_[i, j] for i, j in zip(self.buffers, ch_samples)]
+            period_met: np.bool_ = np.all(
+                [i.shape[0] >= j for i, j in zip(self.buffers, periods)]
+            )
+            has_data: np.bool_ = np.any([i.shape[0] > 0 for i in self.buffers])
+            if (not remainder) and period_met:
+                n_periodss: List[int] = [
+                    i.shape[0] // j for i, j in zip(self.buffers, periods)
+                ]
+                period_boundaries: List = [i * j for i, j in zip(n_periodss, periods)]
+                writebufs: List = [
+                    i[:j] for i, j in zip(self.buffers, period_boundaries)
+                ]
+                self.buffers = [i[j:] for i, j in zip(self.buffers, period_boundaries)]
+                self.writer.writeSamples(writebufs, digital=self.is_digital)
+            elif remainder and has_data:
+                writebufs = self.buffers
+                self.writer.writeSamples(writebufs, digital=self.is_digital)
+            return ch_samples
+
+        #make pysio inherit from read. 
 
     def _fixup_edf_metadata(self, metadata: Dict):
         """A dictionary of values that will be used to store edf metadata
