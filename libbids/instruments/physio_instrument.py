@@ -7,7 +7,6 @@ from ..enums import Modality
 if TYPE_CHECKING:
     from ..session import Session  # type: ignore
 
-#make label be defined after session variable
 class PhysioInstrument(Instrument):
     """An instrument device capable of sampling data from a device"""
 
