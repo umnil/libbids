@@ -265,8 +265,8 @@ class EEGInstrument(ReadInstrument):
         for i, el in enumerate(self.electrodes):
             self.writer.setLabel(i, el)
             self.writer.setPhysicalDimension(i, self.physical_dimension)
-            self.writer.setPhysicalMaximum(i, self.physical_lim[0])
-            self.writer.setPhysicalMinimum(i, self.physical_lim[1])
+            self.writer.setPhysicalMaximum(i, self.physical_lim[1])
+            self.writer.setPhysicalMinimum(i, self.physical_lim[0])
             self.writer.setSamplefrequency(
                 i, self.sfreqs[0] if len(self.sfreqs) == 1 else self.sfreqs[i]
             )
