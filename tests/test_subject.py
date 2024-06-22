@@ -3,9 +3,7 @@ import shutil
 import tempfile
 
 from pathlib import Path
-from libbids import Dataset
-from libbids.clibbids import Session, Subject  # type: ignore
-
+from libbids.clibbids import Dataset, Session, Subject  # type: ignore
 
 
 # Test fixture for Subject class

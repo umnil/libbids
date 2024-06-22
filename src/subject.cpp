@@ -7,6 +7,7 @@
 #include <map>
 #include <optional>
 
+#include "dataset.hpp"
 #include "session.hpp"
 #include "subject.hpp"
 
@@ -15,8 +16,8 @@ namespace py = pybind11;
 // Subject::Subject(Dataset& dataset,
 // std::map<std::string, std::string> const& args)
 //: Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
-Subject::Subject(py::object dataset,
-                 std::map<std::string, std::string> const& args)
+Subject::Subject(std::shared_ptr<Dataset const> dataset,
+                 std::unordered_map<std::string, std::string> const& args)
     : Entity("Subject", std::nullopt), dataset_(dataset), properties_(args) {
   this->properties_["participant_id"] =
       this->ensure_participant_id(this->properties_["participant_id"]);
@@ -35,7 +36,9 @@ Session Subject::add_session(bool silent) {
   }
 }
 
-py::object Subject::dataset(void) const { return this->dataset_; }
+std::shared_ptr<Dataset const> Subject::dataset(void) const {
+  return this->dataset_;
+}
 
 std::string Subject::ensure_participant_id(std::string const& id) {
   std::string retval;
@@ -71,10 +74,10 @@ std::string Subject::get_participant_label() const {
   return this->participant_id_.substr(4);
 }
 
-std::map<std::string, std::string> Subject::get_participant_sidecar() const {
-  std::map<std::string, std::string> sidecar;
-  std::ifstream file(
-      this->dataset_.attr("participants_sidecar_filepath").cast<std::string>());
+std::unordered_map<std::string, std::string> Subject::get_participant_sidecar()
+    const {
+  std::unordered_map<std::string, std::string> sidecar;
+  std::ifstream file(this->dataset_->participants_sidecar_filepath());
   if (file.is_open()) {
     Json::Value sidecar_json;
     file >> sidecar_json;
@@ -104,17 +107,17 @@ Session Subject::get_session(int session_id) {
 }
 
 std::filesystem::path Subject::path() const {
-  // return this->dataset_.bids_dir() / this->participant_id_;
-  return this->dataset_.attr("bids_dir").cast<std::filesystem::path>() /
-         this->participant_id_;
+  // return this->dataset_->bids_dir() / this->participant_id_;
+  return this->dataset_->bids_dir / this->participant_id_;
 }
 
-std::map<std::string, std::string> const& Subject::to_dict(void) const {
+std::unordered_map<std::string, std::string> const& Subject::to_dict(
+    void) const {
   return this->properties_;
 }
 
 // Subject& Subject::operator=(Subject&& other) {
-// this->dataset_ = std::move(other.dataset_);
+// this->dataset_->= std::move(other.dataset_);
 // this->participant_id_ = other.participant_id_;
 // this->participant_name_ = other.participant_name_;
 // this->properties_ = other.properties_;

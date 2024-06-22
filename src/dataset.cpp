@@ -1,97 +1,147 @@
-#include <QMessageBox>
+#include <pybind11/pybind11.h>
+
 #include <cassert>
 #include <fstream>
-#include <regex>
+#include <iostream>
+#include <sstream>
 
 #include "dataset.hpp"
 #include "subject.hpp"
+#include "utils.hpp"
 
-Dataset::Dataset(std::filesystem::path const& dir, bool silent)
-    : bids_dir_(dir),
-      silent_(silent),
-      participants_filepath_(dir / "participants.tsv"),
-      participants_sidecar_filepath_(dir / "participants.json") {
-  assert(std::filesystem::exists(this->bids_dir_));
-  std::ifstream participants_sidecar_fstream{
-      this->participants_sidecar_filepath_.c_str()};
-  participants_sidecar_fstream >> this->participants_sidecar;
+Dataset::Dataset(const std::filesystem::path& bids_dir, bool silent)
+    : bids_dir(bids_dir), silent_(silent) {
+  // Load participants sidecar
+  std::ifstream sidecar_file(this->participants_sidecar_filepath());
+  if (sidecar_file.is_open()) {
+    sidecar_file >> this->participants_sidecar_;
+    sidecar_file.close();
+  } else {
+    std::cerr << "Could not open participants sidecar file." << std::endl;
+  }
 
-  auto member_names = this->participants_sidecar.getMemberNames();
-  this->participants_properties = {"participant_id"};
-  this->participants_properties.insert(this->participants_properties.end(),
-                                       member_names.begin(),
-                                       member_names.end());
+  // Load participant table
   this->load_participants_table_();
-  if (!this->silent_) {
-    this->args_.push_back("App");
-    for (auto& s : this->args_) {
-      this->argvs_.push_back(s.data());
+}
+
+std::optional<Subject> Dataset::add_subject(
+    const std::unordered_map<std::string, std::string>& args) {
+  if (args.size() > this->participants_properties().size()) {
+    std::cerr << "Too many arguments" << std::endl;
+    return std::nullopt;
+  }
+
+  if (!this->silent_ &&
+      !this->confirm_add_subject_(std::stoi(args.at("participant_id")),
+                                  args.at("name"))) {
+    return this->get_subject(std::stoi(args.at("participant_id")));
+  }
+
+  Subject subject(this->shared_from_this(), args);
+  if (std::find(this->get_subjects().begin(), this->get_subjects().end(),
+                std::stoi(subject.get_participant_label())) ==
+      this->get_subjects().end()) {
+    this->append_participant(subject);
+  }
+
+  std::filesystem::create_directories(this->bids_dir /
+                                      subject.get_participant_id());
+  this->load_participants_table_();
+  return subject;
+}
+
+void Dataset::append_participant(const Subject& subject) {
+  std::ofstream participant_file(participants_filepath(), std::ios::app);
+  if (participant_file.is_open()) {
+    for (const auto& [key, value] : subject.to_dict()) {
+      participant_file << key << "\t" << value << "\n";
     }
-    this->argc_ = this->args_.size();
-    this->app_ =
-        std::make_unique<QApplication>(this->argc_, this->argvs_.data());
+    participant_file.close();
+  } else {
+    std::cerr << "Could not open participants file for writing." << std::endl;
   }
 }
 
-void Dataset::append_participant(Subject const& subject) {
-  this->participants_table.push_back(subject.to_dict());
-  this->save_participants_table_();
-}
+std::optional<Subject> Dataset::get_subject(int idx) const {
+  auto participant_id = Subject::ensure_participant_id(idx);
+  auto it = std::find_if(
+      this->participants_table_.begin(), this->participants_table_.end(),
+      [&participant_id](
+          const std::unordered_map<std::string, std::string>& participant) {
+        for (auto& [k, v] : participant)
+          return participant.at("participant_id") == participant_id;
+      });
 
-std::filesystem::path const Dataset::bids_dir(void) const {
-  return this->bids_dir_;
-}
-
-std::filesystem::path const Dataset::participants_filepath(void) const {
-  return this->participants_filepath_;
-}
-
-std::filesystem::path const Dataset::participants_sidecar_filepath(void) const {
-  return this->participants_sidecar_filepath_;
-}
-
-bool Dataset::confirm_add_subject_(int subject_idx, std::string subject_name) {
-  if (!this->is_subject(subject_idx)) {
-    int mb = QMessageBox::warning(
-        nullptr, "Warning",
-        "New Participant ID\nPlease confirm that this is a new participant",
-        QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
-    return mb == QMessageBox::StandardButton::Ok;
+  if (it != participants_table_.end()) {
+    return Subject(this->shared_from_this(), *it);
   } else {
+    return std::nullopt;
+  }
+}
+
+std::vector<int> Dataset::get_subjects() const {
+  std::vector<int> subjects;
+  for (const auto& participant : participants_table_) {
+    subjects.push_back(std::stoi(participant.at("participant_id").substr(4)));
+  }
+  return subjects;
+}
+
+bool Dataset::is_subject(int idx) const { return get_subject(idx).has_value(); }
+
+bool Dataset::confirm_add_subject_(int subject_idx,
+                                   const std::string& subject_name) {
+  if (!this->is_subject(subject_idx)) {
+    std::string prompt = std::string(
+        "New Participant ID\nPlease Confirm that this is a new participant.");
+    py::object qprompt = py::module_::import("libbids").attr("qprompt");
+    return qprompt(prompt, "OK", "No. No this participant is not new")
+        .cast<bool>();
+  } else {
+    auto subject = get_subject(subject_idx);
+    if (subject) {
+      assert(subject_name == subject->get_participant_name());
+    }
     return false;
   }
 }
 
-std::vector<int> Dataset::get_existing_subjects(void) {
-  std::vector<int> subject_ids;
-  std::regex subject_regex("sub-(\\d+)");
-
-  for (auto const& entry :
-       std::filesystem::directory_iterator(this->bids_dir_)) {
-    if (entry.is_directory()) {
-      std::smatch match;
-      std::string folder_name = entry.path().filename().string();
-
-      if (std::regex_match(folder_name, match, subject_regex)) {
-        int subject_id = std::stoi(match[1].str());
-        subject_ids.push_back(subject_id);
-      }
-    }
+// Properties
+std::vector<std::string> Dataset::participants_properties() const {
+  std::vector<std::string> properties;
+  properties.push_back("participant_id");
+  for (const auto& member : this->participants_sidecar_.getMemberNames()) {
+    properties.push_back(member);
   }
-
-  return subject_ids;
+  return properties;
 }
 
-bool Dataset::is_subject(int idx) {
-  return this->get_subject<Subject>(idx) != nullptr;
+std::filesystem::path Dataset::participants_filepath() const {
+  return bids_dir / "participants.tsv";
 }
 
-bool Dataset::is_silent(void) const { return this->silent_; }
+std::unordered_map<std::string, std::string> Dataset::participants_sidecar()
+    const {
+  std::unordered_map<std::string, std::string> sidecar_map;
+  for (const auto& member : participants_sidecar_.getMemberNames()) {
+    sidecar_map[member] = participants_sidecar_[member].asString();
+  }
+  return sidecar_map;
+}
+
+std::filesystem::path Dataset::participants_sidecar_filepath() const {
+  return bids_dir / "participants.json";
+}
+
+std::vector<std::unordered_map<std::string, std::string>>
+Dataset::participant_table() const {
+  return this->participants_table_;
+}
 
 void Dataset::load_participants_table_(void) {
-  if (!std::filesystem::exists(this->participants_filepath_)) return;
+  if (!std::filesystem::exists(this->participants_filepath())) return;
 
-  std::ifstream participants_fs(this->participants_filepath_);
+  std::ifstream participants_fs(this->participants_filepath());
   std::string header_line(255, '\0');
   participants_fs.getline(header_line.data(), header_line.size());
   header_line = trim(header_line);
@@ -102,7 +152,7 @@ void Dataset::load_participants_table_(void) {
     header_stream.getline(word.data(), word.size(), '\t');
     word = trim(word);
     bool found = false;
-    for (auto const& i : this->participants_properties) found |= (i == word);
+    for (auto const& i : this->participants_properties()) found |= (i == word);
     assert(found);
     header.push_back(word);
   }
@@ -113,7 +163,7 @@ void Dataset::load_participants_table_(void) {
     line = trim(line);
 
     std::istringstream line_stream(line);
-    std::map<std::string, std::string> row;
+    std::unordered_map<std::string, std::string> row;
     int i = 0;
     while (!line_stream.eof()) {
       std::string value(255, '\0');
@@ -125,30 +175,6 @@ void Dataset::load_participants_table_(void) {
         i++;
       }
     }
-    this->participants_table.push_back(row);
+    this->participants_table_.push_back(row);
   }
-}
-
-void Dataset::save_participants_table_(void) {
-  std::ofstream participants_fs(this->participants_filepath_);
-
-  if (!participants_fs) return;
-
-  // Write header
-  if (!this->participants_table.empty()) {
-    for (auto const& pair : this->participants_table[0]) {
-      participants_fs << pair.first << '\t';
-    }
-    participants_fs << '\n';
-  }
-
-  // Write data rows
-  for (auto const& row : this->participants_table) {
-    for (auto const& pair : row) {
-      participants_fs << pair.second << '\t';
-    }
-    participants_fs << '\n';
-  }
-
-  participants_fs.close();
 }

@@ -12,8 +12,3 @@ dependencies = [
   "pybids",
   "pyedflib",
 ]
-
-[tools.setuptools.packages.find]
-where = ["libbids"]
-include = ["build"]
-exclude = ["tests"]

@@ -48,10 +48,10 @@ add_library(json STATIC IMPORTED)
 set_target_properties(json PROPERTIES IMPORTED_LOCATION "${JSON_LIB_PATH}")
 add_dependencies(json jsoncpp)
 
-# Qt6
+# Qt
 #find_package(Qt6 REQUIRED COMPONENTS Widgets)
 #if(NOT LINUX)
-	#qt_standard_project_setup()
+    #qt_standard_project_setup()
 #endif()
 #message(STATUS "Qt6 Found: ${Qt6_FOUND}")
 #message(STATUS "Qt Include: ${Qt6Widgets_INCLUDE_DIRS}")
@@ -73,9 +73,11 @@ else()
 pybind11_add_module("${PROJECT_NAME}"
   src/add.cpp
   src/entity.cpp
-  src/ext.cpp
   src/session.cpp
   src/subject.cpp
+  src/dataset.cpp
+  src/utils.cpp
+  src/ext.cpp
 )
 endif()
 
