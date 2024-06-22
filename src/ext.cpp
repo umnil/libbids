@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "add.hpp"
+#include "dataset.hpp"
 #include "entity.hpp"
 #include "session.hpp"
 #include "subject.hpp"
@@ -43,7 +44,8 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("subject", &Session::subject);
 
   py::class_<Subject>(m, "Subject")
-      .def(py::init<py::object, std::map<std::string, std::string>>())
+      .def(py::init<std::shared_ptr<Dataset const>,
+                    std::unordered_map<std::string, std::string>>())
       .def("__getitem__",
            [](Subject& self, std::string const& key) { return self[key]; })
       .def("add_session", &Subject::add_session, py::arg("silent") = false)
@@ -64,4 +66,15 @@ PYBIND11_MODULE(clibbids, m) {
       .def_property_readonly("path", &Subject::path)
       .def_property_readonly("padding", &Subject::padding)
       .def("to_dict", &Subject::to_dict);
+
+  py::class_<Dataset, std::shared_ptr<Dataset>>(m, "Dataset")
+      .def(py::init<const std::filesystem::path&, bool>(), py::arg("bids_dir"),
+           py::arg("silent") = false)
+      .def("add_subject", &Dataset::add_subject)
+      .def("append_participant", &Dataset::append_participant,
+           py::arg("subject"))
+      .def("get_subject", &Dataset::get_subject, py::arg("idx"))
+      .def("get_subjects", &Dataset::get_subjects)
+      .def("is_subject", &Dataset::is_subject, py::arg("idx"))
+      .def_property_readonly("participant_table", &Dataset::participant_table);
 }

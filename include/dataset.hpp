@@ -1,100 +1,118 @@
 #ifndef INCLUDE_DATASET_HPP_
 #define INCLUDE_DATASET_HPP_
-#include <QApplication>
-#include <algorithm>
+
 #include <filesystem>
-#include <iostream>
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "json/json.h"
-#include "utils.hpp"
+
 class Subject;
-class Dataset {
+
+/**
+ * @brief Represents a dataset with methods for managing participants.
+ *
+ * This class provides functionality to manage participant data within
+ * a specified BIDS dataset directory.
+ */
+class Dataset : public std::enable_shared_from_this<Dataset> {
  public:
-  Dataset(std::filesystem::path const& dir, bool silent = false);
-  template <typename T = Subject>
-  std::unique_ptr<T> add_subject(
-      std::map<std::string, std::string> const& args);
-  void append_participant(Subject const& subject);
-  std::vector<int> get_existing_subjects(void);
-  template <typename T = Subject>
-  std::unique_ptr<T> get_subject(int const& idx);
-  bool is_subject(int idx);
-  bool is_silent(void) const;
+  /**
+   * @brief Constructs a Dataset object.
+   *
+   * Initializes a Dataset object with the provided BIDS directory path.
+   *
+   * @param bids_dir The path to the BIDS dataset directory.
+   * @param silent If true, suppresses interactive prompts.
+   */
+  Dataset(const std::filesystem::path& bids_dir, bool silent = false);
 
-  std::filesystem::path const bids_dir(void) const;
-  std::filesystem::path const participants_filepath(void) const;
-  std::filesystem::path const participants_sidecar_filepath(void) const;
-  std::vector<std::string> participants_properties;
-  std::vector<std::map<std::string, std::string>> participants_table;
-  Json::Value participants_sidecar;
+  /**
+   * @brief Adds a new subject/participant to the dataset.
+   *
+   * Creates and adds a new subject/participant to the dataset.
+   *
+   * @param args A map containing properties of the subject/participant.
+   * @return An optional Subject object representing the added participant,
+   *         or std::nullopt if the participant could not be added.
+   */
+  std::optional<Subject> add_subject(
+      const std::unordered_map<std::string, std::string>& args);
 
-  bool confirm_add_subject_(int subject_idx, std::string subject_name);
+  /**
+   * @brief Appends participant data to the dataset file.
+   *
+   * Appends participant data to the dataset file, which stores information
+   * about each participant.
+   *
+   * @param subject The Subject object representing the participant to append.
+   */
+  void append_participant(const Subject& subject);
+
+  /**
+   * @brief Retrieves a subject/participant from the dataset.
+   *
+   * Retrieves a subject/participant from the dataset based on its index.
+   *
+   * @param idx The index of the subject/participant to retrieve.
+   * @return An optional Subject object representing the retrieved participant,
+   *         or std::nullopt if the participant does not exist.
+   */
+  std::optional<Subject> get_subject(int idx) const;
+
+  /**
+   * @brief Retrieves a list of indices of all subjects/participants in the
+   * dataset.
+   *
+   * Retrieves a list of indices representing all subjects/participants
+   * currently present in the dataset.
+   *
+   * @return A vector of integers containing the indices of all
+   * subjects/participants.
+   */
+  std::vector<int> get_subjects() const;
+
+  /**
+   * @brief Checks if a subject/participant exists in the dataset.
+   *
+   * Checks whether a subject/participant with the specified index exists
+   * in the dataset.
+   *
+   * @param idx The index of the subject/participant to check.
+   * @return true if the subject/participant exists, otherwise false.
+   */
+  bool is_subject(int idx) const;
+
+  // Properties
+  std::vector<std::string> participants_properties() const;
+  std::filesystem::path participants_filepath() const;
+  std::unordered_map<std::string, std::string> participants_sidecar() const;
+  std::filesystem::path participants_sidecar_filepath() const;
+  std::vector<std::unordered_map<std::string, std::string>> participant_table()
+      const;
+  std::filesystem::path bids_dir;
 
  private:
-  std::filesystem::path participants_filepath_;
-  std::filesystem::path participants_sidecar_filepath_;
-  std::vector<std::string> args_;
-  std::vector<char*> argvs_;
-  int argc_;
-  std::unique_ptr<QApplication> app_;
+  /**
+   * @brief Prompts the user to confirm adding a new subject/participant.
+   *
+   * Displays a prompt dialog to confirm adding a new subject/participant
+   * with the specified index and name.
+   *
+   * @param subject_idx The index of the subject/participant to add.
+   * @param subject_name The name of the subject/participant to add.
+   * @return true if the user confirms adding the subject/participant, otherwise
+   * false.
+   */
+  bool confirm_add_subject_(int subject_idx, const std::string& subject_name);
   void load_participants_table_(void);
-  void save_participants_table_(void);
-  std::filesystem::path bids_dir_;
+
   bool silent_;
+  Json::Value participants_sidecar_;
+  std::vector<std::unordered_map<std::string, std::string>> participants_table_;
 };
 
-template <typename T>
-std::unique_ptr<T> Dataset::add_subject(
-    std::map<std::string, std::string> const& args) {
-  assert(args.size() <= this->participants_properties.size() &&
-         "Too many arguments");
-
-  std::string const& participant_id = args.at("participant_id");
-  std::string const& id = (participant_id.starts_with("sub-"))
-                              ? participant_id.substr(4)
-                              : participant_id;
-  std::string const& name = args.at("name");
-  int idx;
-  try {
-    idx = std::stoi(id);
-  } catch (std::exception const& e) {
-    std::cout << "Could not interpret participant id of: " << participant_id
-              << std::endl;
-    return nullptr;
-  }
-
-  if (!this->silent_) {
-    if (!this->confirm_add_subject_(idx, name)) {
-      return this->get_subject<T>(idx);
-    }
-  }
-  std::unique_ptr<T> subject = std::make_unique<T>(*this, args);
-
-  std::vector<int> subject_ids = this->get_existing_subjects();
-  if (std::find(subject_ids.begin(), subject_ids.end(), idx) ==
-      subject_ids.end()) {
-    this->append_participant(*subject);
-  }
-
-  std::filesystem::create_directories(this->bids_dir_ /
-                                      (*subject)["participant_id"]);
-  return subject;
-}
-
-template <typename T>
-std::unique_ptr<T> Dataset::get_subject(int const& idx) {
-  std::string participant_id = ensure_participant_id(idx);
-  auto it = std::find_if(
-      this->participants_table.begin(), this->participants_table.end(),
-      [&](auto i) { return i["participant_id"] == participant_id; });
-
-  if (it == this->participants_table.end()) return nullptr;
-  return std::make_unique<T>(*this, *it);
-}
-
-#endif /* INCLUDE_DATASET_HPP_ */
+#endif  // INCLUDE_DATASET_HPP_
