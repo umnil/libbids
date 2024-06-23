@@ -76,5 +76,14 @@ PYBIND11_MODULE(clibbids, m) {
       .def("get_subject", &Dataset::get_subject, py::arg("idx"))
       .def("get_subjects", &Dataset::get_subjects)
       .def("is_subject", &Dataset::is_subject, py::arg("idx"))
+      .def_readonly("bids_dir", &Dataset::bids_dir)
+      .def_property_readonly("participants_filepath",
+                             &Dataset::participants_filepath)
+      .def_property_readonly("participants_properties",
+                             &Dataset::participants_properties)
+      .def_property_readonly("participants_sidecar",
+                             &Dataset::participants_sidecar)
+      .def_property_readonly("participants_sidecar_filepath",
+                             &Dataset::participants_sidecar_filepath)
       .def_property_readonly("participant_table", &Dataset::participant_table);
 }

@@ -28,6 +28,7 @@ std::optional<Subject> Dataset::add_subject(
     const std::unordered_map<std::string, std::string>& args) {
   if (args.size() > this->participants_properties().size()) {
     std::cerr << "Too many arguments" << std::endl;
+    throw std::runtime_error("AssertionError: Too Many Arguments");
     return std::nullopt;
   }
 
@@ -175,6 +176,6 @@ void Dataset::load_participants_table_(void) {
         i++;
       }
     }
-    this->participants_table_.push_back(row);
+    if (row.size() > 1) this->participants_table_.push_back(row);
   }
 }

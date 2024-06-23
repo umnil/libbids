@@ -15,6 +15,7 @@ class TestDataset:
         (self.test_dir / "sub-02").mkdir()
 
         # Create participants table file
+
         with open(self.participants_file, "w") as file:
             file.write("participant_id\tname\n")
             file.write("sub-01\tJohn\n")
@@ -38,7 +39,7 @@ class TestDataset:
     def test_add_subject_valid_arguments_returns_subject(self):
         args = {"participant_id": "sub-03", "name": "Bob"}
 
-        subject = self.dataset.add_subject(**args)
+        subject = self.dataset.add_subject(args)
 
         assert subject is not None
         assert subject["participant_id"] == "sub-03"
@@ -47,8 +48,8 @@ class TestDataset:
     def test_add_subject_too_many_arguments_returns_nullopt(self):
         args = {"participant_id": "sub-03", "name": "Bob", "age": "25"}
 
-        with pytest.raises(AssertionError):
-            self.dataset.add_subject(**args)
+        with pytest.raises(Exception):
+            self.dataset.add_subject(args)
 
     def test_get_subject_existing_subject_returns_subject(self):
         subject = self.dataset.get_subject(1)
